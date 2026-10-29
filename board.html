@@ -56,6 +56,60 @@
   .tag.j { background: linear-gradient(90deg, #fff6c2, #ffd23f); color: #4a2a00; box-shadow: 0 0 12px #ffd23f; }
   .empty { color: var(--dim); font-weight: 700; font-size: 18px; padding: 30px 10px; text-align: center; }
   .godtext { background: #0a0b3d88; }
+
+  /* the big reel show played for each tipped spin, over the rankings */
+  #show { position: absolute; inset: 0; z-index: 3; display: none;
+          background: radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
+                      linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
+  #show.on, #gshow.on { display: block; animation: fadein .4s; }
+  #show.out, #gshow.out { animation: fadeout .5s forwards; }
+  #gshow { position: absolute; inset: 0; z-index: 3; display: none;
+           background: radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
+                       linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
+  #gwho { position: absolute; left: 0; right: 0; top: 30px; text-align: center; }
+  #gwho .title { font-size: 34px; display: inline-block; }
+  #gwho .subtitle { font-size: 16px; margin-top: 2px; }
+  #gtiles { position: absolute; left: 40px; right: 40px; top: 104px; bottom: 34px; display: flex; flex-wrap: wrap;
+            justify-content: center; align-content: center; gap: 12px 22px; }
+  .gtile { width: 210px; text-align: center; }
+  .gname { font-family: var(--title-font); font-weight: 900; font-size: 17px; letter-spacing: 1px; color: #fff;
+           text-shadow: 0 0 10px var(--neon-pink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .greels { display: flex; gap: 8px; justify-content: center; margin: 5px 0 6px; }
+  .gtile .win-box { width: 56px; height: 120px; border-radius: 10px;
+                    box-shadow: 0 0 0 3px #f4f1ff, 0 0 0 5px #9b7bd6, 0 0 14px 3px #ff4fd855, inset 0 0 14px #5a3a9a66; }
+  .gtile .win-box.win { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--wc), 0 0 26px 8px var(--wc); }
+  .gtile .win-box::before, .gtile .win-box::after { height: 30px; }
+  .gtile .cell { height: 40px; font-size: 32px; }
+  .gtag { display: inline-block; }
+  .gtag:empty { visibility: hidden; }
+  .gtag.pop { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes fadein { from { opacity: 0; } }
+  @keyframes fadeout { to { opacity: 0; } }
+  #who { position: absolute; left: 0; right: 0; top: 30px; text-align: center; }
+  #who .title { font-size: 38px; display: inline-block; }
+  #who .subtitle { font-size: 18px; margin-top: 2px; }
+  #reels { position: absolute; left: 0; right: 0; top: 112px; display: flex; justify-content: center; gap: 22px; }
+  .win-box { --wc: #3ff3ff; position: relative; width: 210px; height: 270px; border-radius: 18px; overflow: hidden;
+             box-shadow: 0 0 0 4px #f4f1ff, 0 0 0 7px #9b7bd6, 0 0 22px 6px #ff4fd866, 0 10px 30px #000c, inset 0 0 24px #5a3a9a66; }
+  .win-box::before, .win-box::after { content: ""; position: absolute; left: 0; right: 0; height: 68px; z-index: 2; pointer-events: none; }
+  .win-box::before { top: 0; background: linear-gradient(#2b0f6bd9, transparent); }
+  .win-box::after { bottom: 0; background: linear-gradient(transparent, #2b0f6bd9); }
+  .win-box.win { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--wc), 0 0 50px 14px var(--wc), inset 0 0 24px #5a3a9a44; animation: pulse .5s infinite alternate; }
+  @keyframes pulse { to { transform: scale(1.03); } }
+  .win-box.thud { animation: thud .22s; }
+  @keyframes thud { 40% { transform: translateY(6px); } }
+  .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+  .strip.fast { filter: blur(2.4px); }
+  .cell { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 70px; }
+  .payline { position: absolute; left: 160px; right: 160px; top: 245px; height: 4px; border-radius: 2px; z-index: 3;
+             background: linear-gradient(90deg, transparent, #ff4fd8, #3ff3ff, #ff4fd8, transparent); opacity: .6; box-shadow: 0 0 10px #ff4fd8; }
+  #sbanner { position: absolute; left: 60px; right: 60px; top: 398px; height: 56px; display: flex; align-items: center; justify-content: center; gap: 16px; }
+  #slabel { font-family: var(--title-font); font-weight: 900; font-size: 30px; letter-spacing: 1px; color: var(--gold);
+            text-shadow: 0 0 10px #ffb300aa, 0 0 26px #ff4fd866; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 740px; }
+  #slabel.pop, #spts { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+  #spts { font-weight: 800; font-size: 22px; padding: 6px 14px; border-radius: 12px; color: #fff;
+          background: linear-gradient(90deg, #ff4fd8, #b26bff); box-shadow: 0 0 18px #ff4fd8aa; display: none; }
 </style>
 </head>
 <body>
@@ -63,6 +117,19 @@
   <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Hall of Champions</div></div><div id="totals"></div></header>
   <div class="panel" id="left"><h2>FAVORED BY THE GODS</h2><div id="top"></div></div>
   <div class="panel" id="right"><h2>LATEST SPINS</h2><div id="last"></div></div>
+  <div id="show">
+    <div class="column" style="left:84px;top:124px;height:244px"></div>
+    <div class="column" style="right:84px;top:124px;height:244px"></div>
+    <div id="who"></div>
+    <div id="reels">
+      <div class="win-box marble"><div class="strip"></div></div>
+      <div class="win-box marble"><div class="strip"></div></div>
+      <div class="win-box marble"><div class="strip"></div></div>
+    </div>
+    <div class="payline"></div>
+    <div id="sbanner"><div id="slabel"></div><div id="spts"></div></div>
+  </div>
+  <div id="gshow"><div id="gwho"></div><div id="gtiles"></div></div>
   <div class="tide" id="tide"></div>
   <div class="godtext" id="godtext"></div>
   <canvas class="fx" id="fx" width="1024" height="512"></canvas>
@@ -91,7 +158,7 @@ function render(d, animate) {
       <div class="who"><div class="name">${esc(p.name)}</div>
         <div class="meta">${p.spins} spin${p.spins == 1 ? '' : 's'} · ${p.jp} Zeus jackpot${p.jp == 1 ? '' : 's'}</div></div>
       <div class="score">${p.pts}<small>pts</small></div>
-    </div>`).join('') : '<div class="empty">No spins yet tonight.<br>Ask a dancer for a slot HUD!</div>';
+    </div>`).join('') : '<div class="empty">No spins yet tonight.<br>Tip a dancer\'s jar to spin the reels of the gods!</div>';
 
   $('last').innerHTML = d.last.length ? d.last.map((s, i) => {
     const cls = s.outcome === 'JACKPOT' ? 'j' : s.outcome === 'POSEIDON' ? 'p' : (s.outcome === 'MISS' || s.outcome === 'PAIR') ? '' : 'w';
@@ -104,17 +171,135 @@ function render(d, animate) {
 
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
-    // every roll gets its effect on the board too (without sound, so the room isn't flooded)
-    const s = d.last[0];
-    celebrate(stage, fx, s.outcome, $('godtext'), $('tide'), `${s.name} for ${s.dancer}`, false);
+    if (d.group.length) playGroupShow(d.group, d.payer);
+    else playShow(d.last[0], d.label);
   }
+}
+
+// ---- the big reel shows: one tipper's spin, or "spin everyone" with every dancer at once (with sound)
+const show = $('show'), gshow = $('gshow');
+const boxes = [...show.querySelectorAll('.win-box')];
+const strips = [...show.querySelectorAll('.strip')];
+const rand = () => Math.random() * GODS.length | 0;
+const cell = i => `<div class="cell">${sym(i)}</div>`;
+const around = i => [(i + 5) % 6, i, (i + 1) % 6];
+const RANK = ['JACKPOT', 'POSEIDON', 'APHRODITE', 'DIONYSUS', 'ATHENA', 'ARTEMIS', 'PAIR'];
+let showToken = 0, showTimer;
+
+function setStatic(st, s) {
+  st.dataset.cur = s; st.style.transition = 'none'; st.style.transform = 'translateY(0)';
+  st.innerHTML = around(s).map(cell).join('');
+}
+strips.forEach(st => setStatic(st, rand()));
+function thud(box) { box.classList.remove('thud'); void box.offsetWidth; box.classList.add('thud'); }
+
+// Spins each strip to its final symbol; durFor(i) gives each strip's spin time, thudAt(i) whether its
+// landing makes a sound; done() runs after the last one lands
+function spinSet(sts, bxs, finals, cellH, durFor, thudAt, my, done) {
+  let left = finals.length;
+  Sound.whoosh();
+  const ticker = setInterval(() => Sound.tick(), 70);
+  finals.forEach((f, i) => {
+    const st = sts[i], dur = durFor(i), from = +st.dataset.cur || 0, mid = [];
+    for (let k = 0; k < 16 + (i % 3) * 5; k++) mid.push(rand());
+    const seq = [(from + 5) % 6, from, ...mid, ...around(f)];
+    st.style.transition = 'none'; st.style.transform = 'translateY(0)';
+    st.innerHTML = seq.map(cell).join(''); void st.offsetWidth;
+    st.classList.add('fast');
+    st.style.transition = `transform ${dur}s cubic-bezier(.15,.6,.22,1.06)`;
+    st.style.transform = `translateY(${-(seq.length - 3) * cellH}px)`;
+    setTimeout(() => st.classList.remove('fast'), dur * 700);
+    setTimeout(() => {
+      if (my !== showToken) { clearInterval(ticker); return; }
+      setStatic(st, f); thud(bxs[i]);
+      if (thudAt(i)) Sound.stop();
+      if (--left === 0) { clearInterval(ticker); done(); }
+    }, dur * 1000 + 30);
+  });
+}
+
+function markWins(bxs, reels) {
+  const triple = reels[0] === reels[1] && reels[1] === reels[2];
+  bxs.forEach((b, i) => {
+    b.style.setProperty('--wc', GODS[reels[i]].color);
+    if (triple || reels.filter(y => y === reels[i]).length > 1) b.classList.add('win');
+  });
+  return triple;
+}
+
+// Fade the show out after a while, then light up the tipper's row in the rankings
+function endShowLater(el, my, name) {
+  showTimer = setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => {
+      if (my !== showToken) return;
+      el.className = ''; stage.classList.remove('win');
+      [...document.querySelectorAll('.row')].forEach(row => {
+        if (row.querySelector('.name').textContent === name) { row.classList.remove('hot'); void row.offsetWidth; row.classList.add('hot'); }
+      });
+    }, 500);
+  }, 6500);
+}
+
+function startShow() {
+  const my = ++showToken;
+  clearTimeout(showTimer);
+  show.className = ''; gshow.className = ''; stage.classList.remove('win');
+  return my;
+}
+
+function playShow(s, label) {
+  if (s.reels.length !== 3) return;
+  const my = startShow();
+  $('who').innerHTML = `<div class="title"></div><div class="subtitle">spins the reels for ${esc(s.dancer)}</div>`;
+  fitText($('who').firstChild, s.name, 760, 38);
+  $('slabel').className = ''; $('slabel').textContent = ''; $('spts').style.display = 'none';
+  boxes.forEach(b => b.classList.remove('win'));
+  show.className = 'on';
+  spinSet(strips, boxes, s.reels, 90, i => 1.6 + i * .45, () => true, my, () => {
+    if (markWins(boxes, s.reels)) stage.classList.add('win');
+    $('slabel').textContent = label || OUTCOMES[s.outcome] || ''; $('slabel').className = 'pop';
+    if (s.pts > 0) { $('spts').textContent = `+${s.pts} pts`; $('spts').style.display = 'block'; }
+    celebrate(stage, fx, s.outcome, $('godtext'), $('tide'), `${s.name} for ${s.dancer}`, true);
+    endShowLater(show, my, s.name);
+  });
+}
+
+// "Spin everyone": a tile per dancer, all spinning together; the best result gets the big effect
+function playGroupShow(group, payer) {
+  if (!group.length) return;
+  const my = startShow();
+  $('gwho').innerHTML = `<div class="title"></div><div class="subtitle">spins the reels for every dancer!</div>`;
+  fitText($('gwho').firstChild, payer, 760, 38);
+  $('gtiles').innerHTML = group.map(g => `<div class="gtile"><div class="gname">${esc(g.dancer)}</div>
+    <div class="greels">${[0, 1, 2].map(() => '<div class="win-box marble"><div class="strip"></div></div>').join('')}</div>
+    <div class="gtag"></div></div>`).join('');
+  const tiles = [...gshow.querySelectorAll('.gtile')];
+  const sts = [...gshow.querySelectorAll('.strip')], bxs = [...gshow.querySelectorAll('.win-box')];
+  sts.forEach(st => setStatic(st, rand()));
+  gshow.className = 'on';
+  const finals = [].concat(...group.map(g => g.reels));
+  spinSet(sts, bxs, finals, 40, i => 1.4 + (i / 3 | 0) * .3 + (i % 3) * .3, i => i % 3 === 2, my, () => {
+    let best = group[0];
+    group.forEach((g, t) => {
+      markWins(bxs.slice(t * 3, t * 3 + 3), g.reels);
+      const tag = tiles[t].querySelector('.gtag');
+      tag.textContent = `${OUTCOMES[g.outcome] || g.outcome}${g.pts > 0 ? ' +' + g.pts : ''}`;
+      tag.className = 'gtag tag pop ' + (g.outcome === 'JACKPOT' ? 'j' : g.outcome === 'POSEIDON' ? 'p' : g.outcome === 'PAIR' ? '' : 'w');
+      if (RANK.indexOf(g.outcome) < RANK.indexOf(best.outcome)) best = g;
+    });
+    stage.classList.add('win');
+    celebrate(stage, fx, best.outcome, $('godtext'), $('tide'), `${payer} for ${best.dancer}`, true);
+    endShowLater(gshow, my, payer);
+  });
 }
 
 function parse(h) {
   const list = s => (s || '').split(',').filter(Boolean).map(e => e.split('.'));
   const tot = (h.tot || '0.0').split('.');
   return {
-    title: dec(h.t), spins: +tot[0] || 0, jackpots: +tot[1] || 0,
+    title: dec(h.t), spins: +tot[0] || 0, jackpots: +tot[1] || 0, label: dec(h.lab), payer: dec(h.gp),
+    group: list(h.grp).map(f => ({ dancer: dec(f[0]), reels: (f[1] || '').split('').map(Number), outcome: f[2] || '', pts: +f[3] || 0 })).filter(g => g.reels.length === 3),
     top: list(h.top).map(f => ({ name: dec(f[0]), pts: +f[1] || 0, spins: +f[2] || 0, jp: +f[3] || 0 })),
     last: list(h.last).map(f => ({ name: dec(f[0]), reels: (f[1] || '').split('').map(Number), outcome: f[2] || '', pts: +f[3] || 0, dancer: dec(f[4]) }))
   };
@@ -135,25 +320,37 @@ function startDemo() {
   if (demoTimer) return;
   const names = ['Velvet Rose', 'DJ Maverick', 'Sir Lancelot', 'Kitty Noir', 'Blaze', 'Moonchild', 'Rocco'];
   const dancers = ['Ariel', 'Luna', 'Jade'];
-  const outs = [['JACKPOT', 100, 5], ['POSEIDON', 50, 4], ['APHRODITE', 30, 3], ['DIONYSUS', 20, 2], ['ATHENA', 15, 0],
-                ['ARTEMIS', 10, 1], ['PAIR', 5, -1], ['PAIR', 5, -1], ['PAIR', 5, -1]];
-  const stats = {}, d = { title: '', spins: 0, jackpots: 0, top: [], last: [] };
+  const outs = [['JACKPOT', 100, 5, 'ZEUS! Full power for 30s'], ['POSEIDON', 50, 4, "Poseidon's tide for 20s"],
+                ['APHRODITE', 30, 3, "Aphrodite's fireworks for 20s"], ['DIONYSUS', 20, 2, 'Wild Dionysus for 15s'],
+                ['ATHENA', 15, 0, "Athena's blessing for 12s"], ['ARTEMIS', 10, 1, 'Moonlight pulses for 10s'],
+                ['PAIR', 5, -1, 'A gift from the gods (8s)'], ['PAIR', 5, -1, 'A gift from the gods (8s)']];
+  const stats = {}, d = { title: '', spins: 0, jackpots: 0, top: [], last: [], group: [] };
   let k = 0;
-  const roll = (anim) => {
-    const name = names[Math.random() * names.length | 0];
+  const one = (name, dancer) => {
     const o = k % 9 === 4 ? outs[0] : k % 9 === 7 ? outs[1] : outs[2 + (Math.random() * (outs.length - 2) | 0)];
     k++;
     const a = Math.random() * 6 | 0, b = (a + 1 + (Math.random() * 5 | 0)) % 6;
-    const reels = o[2] >= 0 ? [o[2], o[2], o[2]] : o[0] === 'PAIR' ? [a, a, b] : [a, b, (b + 1) % 6 === a ? (b + 2) % 6 : (b + 1) % 6];
+    const reels = o[2] >= 0 ? [o[2], o[2], o[2]] : [a, a, b];
     const s = stats[name] || (stats[name] = { name, pts: 0, spins: 0, jp: 0 });
     s.pts += o[1]; s.spins++; if (o[0] === 'JACKPOT') { s.jp++; d.jackpots++; }
     d.spins++;
+    d.last = [{ name, reels, outcome: o[0], pts: o[1], dancer }, ...d.last].slice(0, 5);
+    d.label = o[3];
+    return { dancer, reels, outcome: o[0], pts: o[1] };
+  };
+  // every third demo spin is a "spin everyone" across all the dancers
+  let r = 0;
+  const roll = (anim) => {
+    const name = names[Math.random() * names.length | 0];
+    d.group = [];
+    if (anim && r++ % 3 === 1) { d.payer = name; d.group = ['Ariel', 'Luna', 'Jade', 'Nyx', 'Calypso'].map(x => one(name, x)); }
+    else one(name, dancers[Math.random() * dancers.length | 0]);
     d.top = Object.values(stats).sort((x, y) => y.pts - x.pts).slice(0, 5);
-    d.last = [{ name, reels, outcome: o[0], pts: o[1], dancer: dancers[Math.random() * dancers.length | 0] }, ...d.last].slice(0, 5);
     render(d, anim);
   };
   for (let i = 0; i < 12; i++) roll(false);
-  demoTimer = setInterval(() => roll(true), 5500);
+  setTimeout(() => roll(true), 1500);
+  demoTimer = setInterval(() => roll(true), 12000);
 }
 
 apply();

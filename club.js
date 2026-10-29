@@ -134,7 +134,9 @@ function scenery(stage, moon) {
     d.style.animationDelay = (Math.random() * 3) + 's'; d.style.opacity = .3 + Math.random() * .7;
     s.appendChild(d);
   }
-  stage.querySelectorAll('.column').forEach((c, i) => c.insertAdjacentHTML('beforeend', vineSvg(c.offsetHeight, i % 2)));
+  // inline height, since a column inside a hidden layer has no measured size yet
+  stage.querySelectorAll('.column').forEach((c, i) =>
+    c.insertAdjacentHTML('beforeend', vineSvg(parseFloat(c.style.height) || c.offsetHeight, i % 2)));
 }
 
 // Particle, lightning and arrow effects on a full-stage canvas
