@@ -144,7 +144,7 @@ let lastN = null, demoTimer = null;
 fit(stage);
 scenery(stage, [590, 38]);
 
-function render(d, animate) {
+function render(d, animate, fresh) {
   fitText($('club'), d.title || CLUB_DEFAULT, 400, 36);
   $('totals').innerHTML = `<div class="chip"><b>${d.spins}</b> spins</div>`
     + `<div class="chip"><b>${d.jackpots}</b> Zeus jackpot${d.jackpots == 1 ? '' : 's'}</div>`;
@@ -171,9 +171,29 @@ function render(d, animate) {
 
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
-    if (d.group.length) playGroupShow(d.group, d.payer);
-    else playShow(d.last[0], d.label);
+    if (d.group.length) { const g = d.group, payer = d.payer; queueShow(() => playGroupShow(g, payer)); }
+    else {
+      // Several spins can land between two updates: show each of them, oldest first
+      for (let k = Math.min(fresh || 1, d.last.length) - 1; k >= 0; k--) {
+        const s = d.last[k], label = k === 0 ? d.label : '';
+        queueShow(() => playShow(s, label));
+      }
+    }
   }
+}
+
+// Shows wait their turn instead of cutting each other off
+const showQueue = [];
+let showing = false;
+function queueShow(fn) {
+  if (showQueue.length >= 8) showQueue.shift();
+  showQueue.push(fn);
+  if (!showing) nextShow();
+}
+function nextShow() {
+  const fn = showQueue.shift();
+  showing = !!fn;
+  if (fn) fn();
 }
 
 // ---- the big reel shows: one tipper's spin, or "spin everyone" with every dancer at once (with sound)
@@ -227,7 +247,8 @@ function markWins(bxs, reels) {
   return triple;
 }
 
-// Fade the show out after a while, then light up the tipper's row in the rankings
+// Fade the show out after a while (sooner when others are waiting), light up the tipper's row
+// in the rankings, then play the next waiting show
 function endShowLater(el, my, name) {
   showTimer = setTimeout(() => {
     el.classList.add('out');
@@ -237,8 +258,9 @@ function endShowLater(el, my, name) {
       [...document.querySelectorAll('.row')].forEach(row => {
         if (row.querySelector('.name').textContent === name) { row.classList.remove('hot'); void row.offsetWidth; row.classList.add('hot'); }
       });
+      nextShow();
     }, 500);
-  }, 6500);
+  }, showQueue.length ? 4000 : 6500);
 }
 
 function startShow() {
@@ -249,7 +271,7 @@ function startShow() {
 }
 
 function playShow(s, label) {
-  if (s.reels.length !== 3) return;
+  if (s.reels.length !== 3) return nextShow();
   const my = startShow();
   $('who').innerHTML = `<div class="title"></div><div class="subtitle">spins the reels for ${esc(s.dancer)}</div>`;
   fitText($('who').firstChild, s.name, 760, 38);
@@ -267,7 +289,7 @@ function playShow(s, label) {
 
 // "Spin everyone": a tile per dancer, all spinning together; the best result gets the big effect
 function playGroupShow(group, payer) {
-  if (!group.length) return;
+  if (!group.length) return nextShow();
   const my = startShow();
   $('gwho').innerHTML = `<div class="title"></div><div class="subtitle">spins the reels for every dancer!</div>`;
   fitText($('gwho').firstChild, payer, 760, 38);
@@ -310,8 +332,10 @@ function apply() {
   clearInterval(demoTimer); demoTimer = null;
   if (h.n === lastN) return;
   const animate = lastN !== null;
+  // how many spins happened since the last update (the board script batches updates)
+  const fresh = animate ? Math.max(1, Math.min(5, (+h.n) - (+lastN))) : 0;
   lastN = h.n;
-  render(parse(h), animate);
+  render(parse(h), animate, fresh);
 }
 addEventListener('hashchange', apply);
 
