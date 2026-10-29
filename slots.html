@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slots</title>
+<!-- Patron slot screen. The HUD script drives it through the address after "#":
+     s=state (search|idle|spin|wait|paused|away|expired|over), t=club name, d=dancer, x=turn end (unix),
+     n=sequence, r=reels "a,b,c", o=outcome, l=label, p=points, w=wait seconds.
+     With no "#", it plays a demo. Look and symbols come from theme.css and club.js. -->
+<link rel="stylesheet" href="theme.css">
+<style>
+  header { position: absolute; left: 44px; right: 44px; top: 32px; height: 56px; z-index: 2;
+           display: flex; align-items: center; justify-content: space-between; }
+  #club { font-size: 40px; display: inline-block; }
+  .pill { font-weight: 800; font-size: 20px; padding: 7px 18px; border-radius: 999px; background: #ffffff12;
+          border: 2px solid #3ff3ff88; color: #d8ffff; box-shadow: 0 0 16px #3ff3ff44;
+          max-width: 360px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  #reels { position: absolute; left: 0; right: 0; top: 104px; display: flex; justify-content: center; gap: 22px; z-index: 2; }
+  .win-box { --wc: #3ff3ff; position: relative; width: 210px; height: 270px; border-radius: 18px; overflow: hidden;
+             box-shadow: 0 0 0 4px #f4f1ff, 0 0 0 7px #9b7bd6, 0 0 22px 6px #ff4fd866, 0 10px 30px #000c, inset 0 0 24px #5a3a9a66; }
+  .win-box::before, .win-box::after { content: ""; position: absolute; left: 0; right: 0; height: 68px; z-index: 2; pointer-events: none; }
+  .win-box::before { top: 0; background: linear-gradient(#2b0f6bd9, transparent); }
+  .win-box::after { bottom: 0; background: linear-gradient(transparent, #2b0f6bd9); }
+  .win-box.win { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--wc), 0 0 50px 14px var(--wc), inset 0 0 24px #5a3a9a44;
+                 animation: pulse .5s infinite alternate; }
+  @keyframes pulse { to { transform: scale(1.03); } }
+  .win-box.thud { animation: thud .22s; }
+  @keyframes thud { 40% { transform: translateY(6px); } }
+  .strip { position: absolute; left: 0; right: 0; top: 0; will-change: transform; }
+  .strip.fast { filter: blur(2.4px); }
+  .cell { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 70px; }
+  .payline { position: absolute; left: 160px; right: 160px; top: 237px; height: 4px; border-radius: 2px; z-index: 3;
+             background: linear-gradient(90deg, transparent, #ff4fd8, #3ff3ff, #ff4fd8, transparent); opacity: .6; box-shadow: 0 0 10px #ff4fd8; }
+
+  #banner { position: absolute; left: 60px; right: 60px; top: 390px; height: 56px; z-index: 2;
+            display: flex; align-items: center; justify-content: center; gap: 16px; }
+  #label { font-family: var(--title-font); font-weight: 900; font-size: 30px; letter-spacing: 1px; color: var(--gold);
+           text-shadow: 0 0 10px #ffb300aa, 0 0 26px #ff4fd866; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 740px; }
+  #label.tap { animation: breathe 1.6s infinite; color: #fff; text-shadow: 0 0 10px var(--neon-cyan), 0 0 24px var(--neon-cyan); }
+  #label.lose { color: var(--dim); text-shadow: none; font-size: 26px; }
+  @keyframes breathe { 50% { opacity: .55; transform: scale(.97); } }
+  #label.pop { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+  #pts { font-weight: 800; font-size: 22px; padding: 6px 14px; border-radius: 12px; color: #fff;
+         background: linear-gradient(90deg, #ff4fd8, #b26bff); box-shadow: 0 0 18px #ff4fd8aa; display: none;
+         animation: pop .5s .15s both cubic-bezier(.2, 1.6, .4, 1); }
+
+  footer { position: absolute; left: 46px; right: 46px; bottom: 36px; z-index: 2; display: flex; justify-content: space-between;
+           font-weight: 700; font-size: 17px; color: var(--dim); }
+  #hint { color: #d8ffff; }
+
+  #toast { position: absolute; left: 50%; top: 210px; transform: translate(-50%, 0) scale(.8); opacity: 0; z-index: 6;
+           padding: 16px 32px; border-radius: 18px; background: #0a0b3dee; border: 2px solid var(--neon-cyan);
+           font-family: var(--title-font); font-weight: 900; font-size: 28px; color: #d8ffff; white-space: nowrap;
+           box-shadow: 0 0 30px #3ff3ff77; transition: .25s; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+
+  #overlay { position: absolute; inset: 0; z-index: 8; display: none; flex-direction: column; align-items: center; justify-content: center;
+             background: #0a0b3dcc; backdrop-filter: blur(6px); text-align: center; gap: 10px; }
+  #overlay.show { display: flex; animation: fade .4s; }
+  @keyframes fade { from { opacity: 0; } }
+  #ov-icon { font-size: 90px; animation: bob 2.4s infinite ease-in-out; }
+  @keyframes bob { 50% { transform: translateY(-10px); } }
+  #ov-title { font-size: 34px; padding: 0 40px; white-space: normal; }
+  #ov-sub { font-size: 20px; color: var(--dim); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="column" style="left:84px;top:116px;height:244px"></div>
+  <div class="column" style="right:84px;top:116px;height:244px"></div>
+  <header><div class="title" id="club"></div><div class="pill" id="dancer"></div></header>
+  <div id="reels">
+    <div class="win-box marble"><div class="strip"></div></div>
+    <div class="win-box marble"><div class="strip"></div></div>
+    <div class="win-box marble"><div class="strip"></div></div>
+  </div>
+  <div class="payline"></div>
+  <div id="banner"><div id="label" class="tap">TAP TO SPIN</div><div id="pts"></div></div>
+  <footer><span id="turn"></span><span id="hint">Tap the HUD to spin</span></footer>
+  <div id="toast"></div>
+  <div class="tide" id="tide"></div>
+  <div class="godtext" id="godtext"></div>
+  <div id="overlay"><div id="ov-icon"></div><div class="title" id="ov-title"></div><div id="ov-sub"></div></div>
+  <canvas class="fx" id="fx" width="1024" height="512"></canvas>
+</div>
+<script src="club.js"></script>
+<script>
+const H = 90;
+const stage = $('stage');
+const boxes = [...document.querySelectorAll('.win-box')];
+const strips = [...document.querySelectorAll('.strip')];
+const fx = Fx($('fx'));
+const rand = () => Math.random() * GODS.length | 0;
+let cur = [rand(), rand(), rand()];
+let spinToken = 0, lastN = null, turnEnd = 0, demoTimer = null;
+
+fit(stage);
+scenery(stage, [612, 40]);
+
+const cell = i => `<div class="cell">${sym(i)}</div>`;
+const around = i => [(i + 5) % 6, i, (i + 1) % 6];
+function setStatic(r, s) {
+  strips[r].style.transition = 'none';
+  strips[r].style.transform = 'translateY(0)';
+  strips[r].innerHTML = around(s).map(cell).join('');
+}
+cur.forEach((s, r) => setStatic(r, s));
+
+// ---- screen pieces
+function setLabel(text, cls) {
+  const l = $('label'); l.className = ''; void l.offsetWidth;
+  l.textContent = text; if (cls) l.classList.add(...cls.split(' '));
+}
+function clearWin() {
+  stage.classList.remove('win', 'flash'); boxes.forEach(b => b.classList.remove('win'));
+  $('godtext').classList.remove('show'); $('tide').classList.remove('show'); $('pts').style.display = 'none';
+}
+function overlay(icon, title, sub) {
+  const o = $('overlay');
+  if (!icon) { o.classList.remove('show'); return; }
+  clearWin();
+  $('ov-icon').textContent = icon; $('ov-title').textContent = title; $('ov-sub').textContent = sub || '';
+  o.classList.add('show');
+}
+let toastTimer;
+function toast(secs) {
+  const t = $('toast'); clearInterval(toastTimer);
+  const show = () => { t.textContent = `The gods are resting… ${secs}`; };
+  show(); t.classList.add('show');
+  toastTimer = setInterval(() => { if (--secs <= 0) { clearInterval(toastTimer); t.classList.remove('show'); } else show(); }, 1000);
+}
+
+function spin(final, outcome, label, points) {
+  const my = ++spinToken;
+  clearWin(); overlay(); setLabel('The reels turn…', 'lose'); $('hint').textContent = 'May the gods favor you';
+  let done = 0;
+  Sound.whoosh();
+  const ticker = setInterval(() => Sound.tick(), 70);
+  final.forEach((f, r) => {
+    const n = 18 + r * 7, mid = [];
+    for (let i = 0; i < n; i++) mid.push(rand());
+    const seq = [(cur[r] + 5) % 6, cur[r], ...mid, ...around(f)];
+    const s = strips[r], dur = 1.5 + r * .45;
+    s.style.transition = 'none'; s.style.transform = 'translateY(0)';
+    s.innerHTML = seq.map(cell).join(''); void s.offsetWidth;
+    s.classList.add('fast');
+    s.style.transition = `transform ${dur}s cubic-bezier(.15,.6,.22,1.06)`;
+    s.style.transform = `translateY(${-(seq.length - 3) * H}px)`;
+    setTimeout(() => s.classList.remove('fast'), dur * 700);
+    setTimeout(() => {
+      if (my !== spinToken) return;
+      setStatic(r, f); boxes[r].classList.remove('thud'); void boxes[r].offsetWidth; boxes[r].classList.add('thud');
+      Sound.stop();
+      if (++done === 3) { clearInterval(ticker); cur = final.slice(); result(final, outcome, label, points); }
+    }, dur * 1000 + 30);
+  });
+}
+
+function result(final, outcome, label, points) {
+  const triple = final[0] === final[1] && final[1] === final[2];
+  boxes.forEach((b, i) => b.style.setProperty('--wc', GODS[final[i]].color));
+  if (triple) boxes.forEach(b => b.classList.add('win'));
+  else if (outcome === 'PAIR') final.forEach((f, i) => { if (final.filter(x => x === f).length > 1) boxes[i].classList.add('win'); });
+  if (triple) { setLabel(label, 'pop'); stage.classList.add('win'); }
+  else setLabel(label || 'So close…', outcome === 'PAIR' ? 'pop' : 'lose pop');
+  if (points > 0) { $('pts').textContent = `+${points} pts`; $('pts').style.display = 'block'; }
+  celebrate(stage, fx, outcome, $('godtext'), $('tide'), '', true);
+  setTimeout(() => { $('hint').textContent = 'Tap to spin again'; }, 1200);
+}
+
+// ---- turn countdown
+setInterval(() => {
+  if (turnEnd <= 1) { $('turn').textContent = ''; return; }
+  const left = turnEnd - nowSec();
+  $('turn').textContent = left > 0 ? `Your turn ends in ${fmt(left)}` : 'Your turn is ending…';
+}, 1000);
+
+function apply() {
+  const h = readHash();
+  if (!h.s) return startDemo();
+  stopDemo();
+  if (h.n === lastN) return;
+  lastN = h.n;
+  const d = dec(h.d);
+  fitText($('club'), dec(h.t) || CLUB_DEFAULT, 540, 40);
+  $('dancer').textContent = d ? `for ${d}` : '';
+  turnEnd = +h.x || 0;
+  $('hint').textContent = 'Tap the HUD to spin';
+  switch (h.s) {
+    case 'search': overlay('🏛️', 'Seeking your dancer…', 'Stay in the same region. The slots connect by themselves.'); break;
+    case 'away': overlay('🌙', `${d || 'Your dancer'} has stepped away`, 'Waiting for them to return…'); break;
+    case 'paused': overlay('⏸️', `${d || 'Your dancer'} paused the slots`, 'Hang tight, they will be back soon.'); break;
+    case 'expired': overlay('⌛', 'Your turn is over', 'Thanks for playing! Ask a dancer for a new HUD.'); break;
+    case 'over': overlay('💋', `Your turn with ${d || 'your dancer'} is over`, 'Thanks for playing!'); break;
+    case 'wait': overlay(); toast(+h.w || 5); break;
+    case 'spin': {
+      const r = (h.r || '').split(',').map(Number);
+      if (r.length === 3 && r.every(x => x >= 0 && x < 6)) spin(r, h.o || '', dec(h.l), +h.p || 0);
+      break;
+    }
+    default: overlay(); clearWin(); setLabel('TAP TO SPIN', 'tap');
+  }
+}
+addEventListener('hashchange', apply);
+
+// ---- demo when opened without any state (for previewing in a browser)
+function startDemo() {
+  if (demoTimer) return;
+  fitText($('club'), CLUB_DEFAULT, 540, 40);
+  $('dancer').textContent = 'for Your Dancer';
+  turnEnd = nowSec() + 3 * 3600 + 754;
+  // plays every outcome in turn so each effect can be previewed
+  const table = [['JACKPOT', 5, 100, 'ZEUS! Full power for 30s'], ['APHRODITE', 3, 30, "Aphrodite's fireworks for 20s"],
+    ['POSEIDON', 4, 50, "Poseidon's tide for 20s"], ['PAIR', -1, 5, 'A gift from the gods (8s)'],
+    ['DIONYSUS', 2, 20, 'Wild Dionysus for 15s'], ['ATHENA', 0, 15, "Athena's blessing for 12s"],
+    ['ARTEMIS', 1, 10, 'Moonlight pulses for 10s']];
+  let k = 0;
+  const go = () => {
+    const pick = table[k++ % table.length];
+    let r;
+    if (pick[1] >= 0) r = [pick[1], pick[1], pick[1]];
+    else { const a = rand(), b = (a + 1 + (Math.random() * 5 | 0)) % 6; r = pick[0] === 'PAIR' ? [a, b, a] : [a, b, (b + 1) % 6 === a ? (b + 2) % 6 : (b + 1) % 6]; }
+    spin(r, pick[0], pick[3], pick[2]);
+  };
+  setTimeout(go, 800);
+  demoTimer = setInterval(go, 8000);
+}
+function stopDemo() { clearInterval(demoTimer); demoTimer = null; }
+
+apply();
+</script>
+</body>
+</html>

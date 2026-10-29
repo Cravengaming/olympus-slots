@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard</title>
+<!-- In-world leaderboard. The board script drives it through the address after "#":
+     t=club name, tot=spins.jackpots, n=sequence,
+     top=name.points.spins.jackpots,... (best first)
+     last=name.reels.outcome.points.dancer,... (newest first; reels like "555")
+     Names are URL-escaped, so "." and "," inside them never clash. With no "#", it plays a demo.
+     Look and symbols come from theme.css and club.js. -->
+<link rel="stylesheet" href="theme.css">
+<style>
+  header { position: absolute; left: 40px; right: 40px; top: 30px; height: 54px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
+  .heading { display: flex; align-items: baseline; gap: 16px; }
+  #club { font-size: 36px; display: inline-block; }
+  #totals { display: flex; gap: 10px; }
+  .chip { font-weight: 800; font-size: 17px; padding: 6px 14px; border-radius: 999px; background: #ffffff10; border: 2px solid #ffffff22; white-space: nowrap; }
+  .chip b { color: var(--gold); font-size: 21px; }
+
+  .panel { position: absolute; top: 96px; bottom: 40px; z-index: 2; border-radius: 16px; padding: 10px 14px;
+           background: #0a0b3d99; border: 2px solid #ffffff1c; box-shadow: inset 0 0 30px #ff4fd822; }
+  #left { left: 34px; width: 540px; }
+  #right { left: 590px; right: 34px; }
+  h2 { margin: 0 0 6px; font-family: var(--title-font); font-weight: 900; font-size: 18px; letter-spacing: 3px; color: var(--neon-cyan); text-shadow: 0 0 10px #3ff3ff88; }
+
+  .row { position: relative; height: 60px; margin-bottom: 4px; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 12px; overflow: hidden; }
+  .row .bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 12px; background: linear-gradient(90deg, #ff4fd833, #3ff3ff1a); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+  .row > *:not(.bar) { position: relative; }
+  .rank { width: 44px; text-align: center; font-family: var(--title-font); font-weight: 900; font-size: 28px; color: var(--dim); }
+  .rank.r1 { color: var(--gold); text-shadow: 0 0 12px #ffb300; }
+  .rank.r2 { color: #e8ecff; text-shadow: 0 0 10px #c9d4ff; }
+  .rank.r3 { color: #ffb38a; text-shadow: 0 0 10px #ff7a3d; }
+  .who { flex: 1; min-width: 0; }
+  .name { font-weight: 800; font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { font-size: 14px; color: var(--dim); font-weight: 700; }
+  .score { font-family: var(--title-font); font-weight: 900; font-size: 30px; color: var(--gold); text-shadow: 0 0 10px #ffb30088; }
+  .score small { font-family: var(--body-font); font-size: 13px; color: var(--dim); margin-left: 3px; }
+  .row.hot { animation: hot 1.2s 2; }
+  @keyframes hot { 50% { background: #ff4fd844; box-shadow: 0 0 20px #ff4fd888; } }
+
+  .spin { height: 60px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: 12px; }
+  .spin.new { animation: slide .6s cubic-bezier(.2, 1.3, .4, 1); background: #ffffff10; }
+  @keyframes slide { from { transform: translateY(-40px); opacity: 0; } }
+  .mini { display: flex; gap: 4px; }
+  .mini div { width: 40px; height: 46px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+              font-size: 32px; box-shadow: 0 0 0 2px #f4f1ff, 0 0 0 3px #9b7bd6; overflow: hidden; }
+  .mini.rolling div .god { animation: roll .12s linear infinite; filter: blur(1.5px); }
+  @keyframes roll { from { transform: translateY(-30px); } to { transform: translateY(30px); } }
+  .spin .who .name { font-size: 17px; }
+  .spin .meta { font-size: 13px; }
+  .tag { font-weight: 800; font-size: 13px; padding: 4px 9px; border-radius: 8px; background: #ffffff18; color: var(--dim); white-space: nowrap; }
+  .tag.w { background: linear-gradient(90deg, #ff4fd8, #b26bff); color: #fff; }
+  .tag.p { background: linear-gradient(90deg, #3ff3ff, #1a8cff); color: #04203a; }
+  .tag.j { background: linear-gradient(90deg, #fff6c2, #ffd23f); color: #4a2a00; box-shadow: 0 0 12px #ffd23f; }
+  .empty { color: var(--dim); font-weight: 700; font-size: 18px; padding: 30px 10px; text-align: center; }
+  .godtext { background: #0a0b3d88; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Hall of Champions</div></div><div id="totals"></div></header>
+  <div class="panel" id="left"><h2>FAVORED BY THE GODS</h2><div id="top"></div></div>
+  <div class="panel" id="right"><h2>LATEST SPINS</h2><div id="last"></div></div>
+  <div class="tide" id="tide"></div>
+  <div class="godtext" id="godtext"></div>
+  <canvas class="fx" id="fx" width="1024" height="512"></canvas>
+</div>
+<script src="club.js"></script>
+<script>
+const stage = $('stage');
+const fx = Fx($('fx'));
+const NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
+let lastN = null, demoTimer = null;
+
+fit(stage);
+scenery(stage, [590, 38]);
+
+function render(d, animate) {
+  fitText($('club'), d.title || CLUB_DEFAULT, 400, 36);
+  $('totals').innerHTML = `<div class="chip"><b>${d.spins}</b> spins</div>`
+    + `<div class="chip"><b>${d.jackpots}</b> Zeus jackpot${d.jackpots == 1 ? '' : 's'}</div>`;
+
+  const best = Math.max(1, ...d.top.map(p => p.pts));
+  const hotName = animate && d.last[0] ? d.last[0].name : null;
+  $('top').innerHTML = d.top.length ? d.top.map((p, i) => `
+    <div class="row${p.name === hotName ? ' hot' : ''}">
+      <div class="bar" style="width:${Math.max(6, p.pts / best * 100)}%"></div>
+      <div class="rank r${i + 1}">${NUMERALS[i]}</div>
+      <div class="who"><div class="name">${esc(p.name)}</div>
+        <div class="meta">${p.spins} spin${p.spins == 1 ? '' : 's'} · ${p.jp} Zeus jackpot${p.jp == 1 ? '' : 's'}</div></div>
+      <div class="score">${p.pts}<small>pts</small></div>
+    </div>`).join('') : '<div class="empty">No spins yet tonight.<br>Ask a dancer for a slot HUD!</div>';
+
+  $('last').innerHTML = d.last.length ? d.last.map((s, i) => {
+    const cls = s.outcome === 'JACKPOT' ? 'j' : s.outcome === 'POSEIDON' ? 'p' : (s.outcome === 'MISS' || s.outcome === 'PAIR') ? '' : 'w';
+    return `<div class="spin${animate && i === 0 ? ' new' : ''}">
+      <div class="mini${animate && i === 0 ? ' rolling' : ''}">${s.reels.map(r => `<div class="marble">${sym(r)}</div>`).join('')}</div>
+      <div class="who"><div class="name">${esc(s.name)}</div><div class="meta">for ${esc(s.dancer)}</div></div>
+      <div class="tag ${cls}">${OUTCOMES[s.outcome] || esc(s.outcome)}${s.pts > 0 ? ' +' + s.pts : ''}</div>
+    </div>`;
+  }).join('') : '<div class="empty">Spins show up here as they happen.</div>';
+
+  if (animate && d.last[0]) {
+    setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
+    // every roll gets its effect on the board too (without sound, so the room isn't flooded)
+    const s = d.last[0];
+    celebrate(stage, fx, s.outcome, $('godtext'), $('tide'), `${s.name} for ${s.dancer}`, false);
+  }
+}
+
+function parse(h) {
+  const list = s => (s || '').split(',').filter(Boolean).map(e => e.split('.'));
+  const tot = (h.tot || '0.0').split('.');
+  return {
+    title: dec(h.t), spins: +tot[0] || 0, jackpots: +tot[1] || 0,
+    top: list(h.top).map(f => ({ name: dec(f[0]), pts: +f[1] || 0, spins: +f[2] || 0, jp: +f[3] || 0 })),
+    last: list(h.last).map(f => ({ name: dec(f[0]), reels: (f[1] || '').split('').map(Number), outcome: f[2] || '', pts: +f[3] || 0, dancer: dec(f[4]) }))
+  };
+}
+function apply() {
+  const h = readHash();
+  if (!('n' in h)) return startDemo();
+  clearInterval(demoTimer); demoTimer = null;
+  if (h.n === lastN) return;
+  const animate = lastN !== null;
+  lastN = h.n;
+  render(parse(h), animate);
+}
+addEventListener('hashchange', apply);
+
+// ---- demo for previewing in a browser
+function startDemo() {
+  if (demoTimer) return;
+  const names = ['Velvet Rose', 'DJ Maverick', 'Sir Lancelot', 'Kitty Noir', 'Blaze', 'Moonchild', 'Rocco'];
+  const dancers = ['Ariel', 'Luna', 'Jade'];
+  const outs = [['JACKPOT', 100, 5], ['POSEIDON', 50, 4], ['APHRODITE', 30, 3], ['DIONYSUS', 20, 2], ['ATHENA', 15, 0],
+                ['ARTEMIS', 10, 1], ['PAIR', 5, -1], ['PAIR', 5, -1], ['PAIR', 5, -1]];
+  const stats = {}, d = { title: '', spins: 0, jackpots: 0, top: [], last: [] };
+  let k = 0;
+  const roll = (anim) => {
+    const name = names[Math.random() * names.length | 0];
+    const o = k % 9 === 4 ? outs[0] : k % 9 === 7 ? outs[1] : outs[2 + (Math.random() * (outs.length - 2) | 0)];
+    k++;
+    const a = Math.random() * 6 | 0, b = (a + 1 + (Math.random() * 5 | 0)) % 6;
+    const reels = o[2] >= 0 ? [o[2], o[2], o[2]] : o[0] === 'PAIR' ? [a, a, b] : [a, b, (b + 1) % 6 === a ? (b + 2) % 6 : (b + 1) % 6];
+    const s = stats[name] || (stats[name] = { name, pts: 0, spins: 0, jp: 0 });
+    s.pts += o[1]; s.spins++; if (o[0] === 'JACKPOT') { s.jp++; d.jackpots++; }
+    d.spins++;
+    d.top = Object.values(stats).sort((x, y) => y.pts - x.pts).slice(0, 5);
+    d.last = [{ name, reels, outcome: o[0], pts: o[1], dancer: dancers[Math.random() * dancers.length | 0] }, ...d.last].slice(0, 5);
+    render(d, anim);
+  };
+  for (let i = 0; i < 12; i++) roll(false);
+  demoTimer = setInterval(() => roll(true), 5500);
+}
+
+apply();
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+/* Club look shared by every screen (slots.html, board.html, dancer.html).
+   Change colors and fonts here and all three follow. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@500;700;800&display=swap');
+
+:root {
+  --sky-top: #0a0b3d;
+  --sky-mid: #2b0f6b;
+  --sky-low: #5a1a9a;
+  --neon-pink: #ff4fd8;
+  --neon-cyan: #3ff3ff;
+  --neon-violet: #b26bff;
+  --marble: #f6f2ff;
+  --gold: #ffe27a;
+  --gold-deep: #c98a00;
+  --ink: #fbf7ff;
+  --dim: #c7b8ef;
+  --title-font: Cinzel, Georgia, serif;
+  --body-font: Montserrat, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #05041a; overflow: hidden; }
+body { font-family: var(--body-font); color: var(--ink); }
+
+/* 1024x512 scene, scaled to fit by club.js */
+.stage {
+  position: absolute; left: 50%; top: 50%; width: 1024px; height: 512px; transform-origin: center;
+  border-radius: 26px; overflow: hidden;
+  background:
+    radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
+    radial-gradient(60% 28% at 50% 106%, #3ff3ff66, transparent 70%),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 42%, var(--sky-low) 76%, #2a0a5e 100%);
+}
+.stage.flash { animation: flash .12s 9 alternate; }
+@keyframes flash { to { background: linear-gradient(180deg, #dff4ff, #b9a8ff 60%, #ff9fe8); } }
+
+/* vaporwave tiled wall glowing behind the middle */
+.grid { position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(#ffffff14 1px, transparent 1px), linear-gradient(90deg, #ffffff14 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(55% 60% at 50% 55%, #000, transparent 75%);
+  mask-image: radial-gradient(55% 60% at 50% 55%, #000, transparent 75%); }
+
+/* night sky */
+.stars { position: absolute; left: 0; right: 0; top: 0; height: 46%; pointer-events: none; }
+.stars i { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; box-shadow: 0 0 4px #fff;
+  animation: twinkle 3s infinite ease-in-out; }
+@keyframes twinkle { 50% { opacity: .2; } }
+.moon { position: absolute; width: 34px; height: 34px; border-radius: 50%; box-shadow: 9px 5px 0 0 #fff6d8;
+  filter: drop-shadow(0 0 10px #fff6d8aa); pointer-events: none; }
+
+/* glowing pool at the bottom */
+.pool { position: absolute; left: 22%; right: 22%; bottom: -46px; height: 96px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(#b8ffff, #3ff3ff77 40%, transparent 70%); filter: blur(3px); animation: pool 4s ease-in-out infinite alternate; }
+@keyframes pool { to { opacity: .6; transform: scaleX(1.06); } }
+
+/* neon tube around the edge */
+.neon { position: absolute; inset: 9px; border-radius: 20px; border: 2px solid #ffa6ee; pointer-events: none; z-index: 5;
+  box-shadow: 0 0 6px var(--neon-pink), 0 0 20px #ff4fd8aa, inset 0 0 6px var(--neon-pink), inset 0 0 22px #3ff3ff33;
+  animation: buzz 7s infinite; }
+@keyframes buzz { 0%, 91%, 93%, 95%, 100% { opacity: 1; } 92%, 94% { opacity: .55; } }
+.stage.win .neon { animation: neonwin .35s infinite alternate; }
+@keyframes neonwin { to { border-color: #b8ffff; box-shadow: 0 0 6px var(--neon-cyan), 0 0 26px #3ff3ffcc, inset 0 0 8px var(--neon-cyan), inset 0 0 26px #ff4fd855; } }
+
+/* gold greek key bands */
+.key { position: absolute; left: 30px; right: 30px; height: 18px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23fff3b0'/%3E%3Cstop offset='1' stop-color='%23e0a100'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 19H20M3 19V3H17V15H7V7H13V11' fill='none' stroke='url(%23g)' stroke-width='2.4'/%3E%3C/svg%3E") repeat-x 0 0 / 18px 18px;
+  filter: drop-shadow(0 0 3px #ffb300) drop-shadow(0 0 8px #ffb30077); }
+.key::after { content: ""; position: absolute; left: 0; right: 0; top: -5px; height: 2px; border-radius: 1px;
+  background: linear-gradient(90deg, transparent, #ffe27a 8%, #ffe27a 92%, transparent); }
+.key.top { top: 18px; transform: scaleY(-1); }
+.key.bottom { bottom: 18px; }
+
+/* marble column */
+.column { position: absolute; width: 50px; pointer-events: none; border-radius: 3px;
+  background: linear-gradient(90deg, #2b0f6b55, transparent 30%, transparent 65%, #2b0f6b77),
+              repeating-linear-gradient(90deg, #fbf8ff 0 7px, #cfc4ea 7px 9px);
+  box-shadow: -6px 0 18px #ff4fd866, 6px 0 18px #3ff3ff55; }
+.column::before, .column::after { content: ""; position: absolute; left: -10px; right: -10px; height: 15px; border-radius: 4px;
+  background: linear-gradient(#ffffff, #d6cdee); box-shadow: 0 0 10px #ff4fd855; }
+.column::before { top: -13px; }
+.column::after { bottom: -13px; }
+.column .vine { position: absolute; left: -12px; top: 0; overflow: visible; z-index: 1; filter: drop-shadow(0 0 4px #5be3a066); }
+
+/* titles in glowing neon capitals */
+.title { font-family: var(--title-font); font-weight: 900; letter-spacing: 3px; color: #fff; white-space: nowrap;
+  text-shadow: 0 0 4px #fff, 0 0 12px var(--neon-pink), 0 0 26px var(--neon-pink), 0 0 42px var(--neon-violet); }
+.subtitle { font-family: var(--title-font); font-weight: 700; letter-spacing: 2px; color: var(--neon-cyan);
+  text-shadow: 0 0 10px #3ff3ffaa; }
+
+/* god symbols (drawn in club.js) */
+.god { width: 1em; height: 1em; overflow: visible; vertical-align: middle; }
+.god4 { filter: drop-shadow(0 0 4px #3ff3ffaa); }
+.god5 { filter: drop-shadow(0 0 5px #ffd23fcc); }
+
+/* white marble tile used for reels */
+.marble {
+  background:
+    linear-gradient(115deg, transparent 40%, #b8a9d955 41.5%, transparent 43%),
+    linear-gradient(62deg, transparent 63%, #b8a9d944 64%, transparent 65.5%),
+    linear-gradient(150deg, transparent 20%, #c9bde633 21%, transparent 22.5%),
+    radial-gradient(120% 80% at 30% 20%, #ffffff, #ece6fb 60%, #d9cff0);
+}
+
+/* big god announcement and Poseidon's wave */
+.godtext { position: absolute; inset: 0; z-index: 7; display: none; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.godtext.show { display: flex; }
+.godtext .big { font-family: var(--title-font); font-weight: 900; font-size: 130px; letter-spacing: 8px; line-height: 1;
+  animation: zoom .6s cubic-bezier(.2, 1.6, .4, 1); }
+.godtext .sub { font-family: var(--title-font); font-weight: 900; font-size: 32px; letter-spacing: 6px; color: #fff; margin-top: 6px;
+  text-shadow: 0 0 12px var(--neon-pink); animation: zoom .6s .15s both cubic-bezier(.2, 1.6, .4, 1); }
+.godtext.zeus .big { color: #fff8d0; font-size: 150px; text-shadow: 0 0 8px #fff, 0 0 20px #ffd23f, 0 0 40px #ffb300, 0 0 70px #9fdcff;
+  animation: zoom .6s cubic-bezier(.2, 1.6, .4, 1), crackle .09s .6s 12 alternate; }
+@keyframes crackle { to { text-shadow: 0 0 14px #fff, 0 0 34px #9fdcff, 0 0 60px #ffd23f, 0 0 90px #fff; } }
+.godtext.poseidon .big { color: #e6ffff; text-shadow: 0 0 8px #fff, 0 0 20px #3ff3ff, 0 0 44px #1a8cff; }
+.godtext.aphrodite .big { color: #ffe6f6; font-size: 104px; text-shadow: 0 0 8px #fff, 0 0 20px #ff4fd8, 0 0 44px #ff2f6e; }
+.godtext.dionysus .big { color: #f3d2ff; font-size: 110px; text-shadow: 0 0 8px #fff, 0 0 20px #c77dff, 0 0 44px #7a1fd0; }
+.godtext.athena .big { color: #f4f6ff; text-shadow: 0 0 8px #fff, 0 0 20px #c9d4ff, 0 0 44px #6a7cff; }
+.godtext.artemis .big { color: #f6f2ff; font-size: 120px; text-shadow: 0 0 8px #fff, 0 0 20px #c3b4ff, 0 0 44px #8a6bff; }
+@keyframes zoom { from { transform: scale(0) rotate(-6deg); opacity: 0; } }
+
+/* shakes; "translate" stacks on top of the scaling transform */
+.stage.quake { animation: quake .08s 16; }
+@keyframes quake { 25% { translate: -6px 4px; } 50% { translate: 5px -5px; } 75% { translate: -4px -3px; } }
+.stage.sway { animation: sway 1.2s ease-in-out 3; }
+@keyframes sway { 25% { translate: -8px 2px; rotate: -.6deg; } 75% { translate: 8px -2px; rotate: .6deg; } }
+.stage.bounce { animation: bounce .3s 4; }
+@keyframes bounce { 50% { translate: 0 -8px; } }
+
+/* Athena's shining sweep, a color wash, and Artemis's moon swelling */
+.sweep { position: absolute; top: -20%; bottom: -20%; width: 180px; left: -260px; z-index: 6; pointer-events: none; display: none;
+  background: linear-gradient(90deg, transparent, #ffffffcc, transparent); transform: skewX(-20deg); }
+.sweep.go { display: block; animation: sweep .9s ease-in-out 3; }
+@keyframes sweep { to { left: 1120px; } }
+.wash { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0;
+  background: radial-gradient(circle at 50% 50%, var(--wash, #ff4fd8) 0%, transparent 70%); }
+.wash.go { animation: wash .7s ease-in-out 4 alternate; }
+@keyframes wash { to { opacity: .55; } }
+.moon.full { animation: moonup 3.2s ease-in-out; z-index: 6; }
+@keyframes moonup { 30%, 70% { transform: scale(3.2); filter: drop-shadow(0 0 30px #fff6d8) drop-shadow(0 0 60px #c3b4ff); } }
+
+.tide { position: absolute; left: -10%; right: -10%; bottom: -380px; height: 380px; z-index: 6; pointer-events: none; display: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='40'%3E%3Cpath d='M0 20Q30 0 60 20T120 20T180 20T240 20V40H0Z' fill='%233ff3ff' fill-opacity='.75'/%3E%3C/svg%3E") repeat-x 0 0 / 240px 40px,
+    linear-gradient(#3ff3ffbb, #1a5affaa) 0 39px / 100% 100% no-repeat; }
+.tide.show { display: block; animation: tide 4.2s ease-in-out, swell .8s linear infinite; }
+@keyframes tide { 0% { transform: translateY(0); } 30% { transform: translateY(-340px); } 45% { transform: translateY(-300px); } 60% { transform: translateY(-350px); } 100% { transform: translateY(0); } }
+@keyframes swell { to { background-position: 240px 0, 0 39px; } }
+
+canvas.fx { position: absolute; inset: 0; z-index: 9; pointer-events: none; }

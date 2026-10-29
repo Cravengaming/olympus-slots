@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control</title>
+<!-- Dancer controller screen. The controller script drives it through the address after "#":
+     s=live|paused, t=club name, pl=player, x=turn end (unix, 0 = never), mx=max level, n=sequence,
+     r=last reels "a,b,c", o=outcome, l=label, lv=level or preset name, sec=reward seconds, at=reward start (unix).
+     With no "#", it plays a demo. Look and symbols come from theme.css and club.js. -->
+<link rel="stylesheet" href="theme.css">
+<style>
+  header { position: absolute; left: 40px; right: 40px; top: 30px; height: 54px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
+  .heading { display: flex; align-items: baseline; gap: 14px; }
+  #club { font-size: 32px; display: inline-block; }
+  #status { font-family: var(--title-font); font-weight: 900; font-size: 22px; letter-spacing: 2px; padding: 6px 20px; border-radius: 999px; display: flex; align-items: center; gap: 12px; }
+  #status.live { color: #7dffc0; background: #4dff9a1a; border: 2px solid #4dff9a88; box-shadow: 0 0 16px #4dff9a44; }
+  #status.paused { color: #ff7a93; background: #ff4d6d1a; border: 2px solid #ff4d6d88; box-shadow: 0 0 16px #ff4d6d44; }
+  #status i { width: 14px; height: 14px; border-radius: 50%; background: currentColor; box-shadow: 0 0 12px currentColor; animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  .card { position: absolute; z-index: 2; border-radius: 16px; padding: 14px 18px; background: #0a0b3d99; border: 2px solid #ffffff1c; box-shadow: inset 0 0 30px #ff4fd822; }
+  .card h2 { margin: 0 0 6px; font-family: var(--title-font); font-weight: 900; font-size: 16px; letter-spacing: 3px; color: var(--neon-cyan); text-shadow: 0 0 10px #3ff3ff88; }
+  #player { left: 34px; top: 96px; width: 420px; height: 160px; }
+  #pname { font-weight: 800; font-size: 32px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pname.none { color: var(--dim); font-size: 24px; }
+  #pturn { margin-top: 8px; font-weight: 700; font-size: 17px; color: #ffd6f6; }
+  #last { left: 34px; top: 268px; width: 420px; height: 176px; }
+  .mini { display: flex; gap: 8px; margin: 6px 0 10px; }
+  .mini div { width: 72px; height: 76px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 54px;
+              box-shadow: 0 0 0 3px #f4f1ff, 0 0 0 5px #9b7bd6, 0 0 14px #ff4fd855; }
+  #llabel { font-family: var(--title-font); font-weight: 900; font-size: 18px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 8px #ffb30088; }
+
+  #toy { left: 470px; right: 34px; top: 96px; height: 348px; }
+  #meter { display: flex; gap: 5px; align-items: flex-end; height: 168px; margin: 12px 0 12px; }
+  #meter div { flex: 1; border-radius: 6px 6px 3px 3px; background: #ffffff12; transition: background .3s, box-shadow .3s; }
+  #meter div.on { background: linear-gradient(180deg, #3ff3ff, #b26bff 50%, #ff4fd8); box-shadow: 0 0 12px #ff4fd888; animation: buzz .14s infinite alternate; }
+  #meter div.capped { background: #ffffff05; outline: 1px dashed #ffffff22; }
+  @keyframes buzz { to { transform: translateY(-3px); } }
+  #toyline { display: flex; justify-content: space-between; align-items: baseline; }
+  #toynow { font-family: var(--title-font); font-weight: 900; font-size: 28px; color: var(--gold); text-shadow: 0 0 10px #ffb30088; }
+  #toynow.idle { color: var(--dim); text-shadow: none; }
+  #toymax { font-weight: 700; font-size: 16px; color: var(--dim); }
+  #timebar { margin-top: 12px; height: 12px; border-radius: 6px; background: #ffffff14; overflow: hidden; }
+  #timefill { height: 100%; width: 0; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink)); box-shadow: 0 0 10px var(--neon-pink); }
+  #timetxt { margin-top: 8px; font-weight: 700; font-size: 15px; color: var(--dim); }
+  footer { position: absolute; left: 40px; right: 40px; bottom: 38px; z-index: 2; font-weight: 700; font-size: 15px; color: var(--dim); text-align: center; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Control</div></div><div id="status" class="live"><i></i><span>LIVE</span></div></header>
+  <div class="card" id="player"><h2>NOW PLAYING</h2><div id="pname"></div><div id="pturn"></div></div>
+  <div class="card" id="last"><h2>LAST SPIN</h2><div class="mini" id="lreels"></div><div id="llabel"></div></div>
+  <div class="card" id="toy"><h2>YOUR TOY</h2><div id="meter"></div>
+    <div id="toyline"><div id="toynow"></div><div id="toymax"></div></div>
+    <div id="timebar"><div id="timefill"></div></div><div id="timetxt"></div></div>
+  <footer>Click the HUD for the menu · STOP is always in the menu</footer>
+</div>
+<script src="club.js"></script>
+<script>
+const PRESETS = { pulse: 'Pulse pattern', wave: 'Wave pattern', fireworks: 'Fireworks pattern', earthquake: 'Earthquake pattern' };
+const stage = $('stage');
+let st = null, demoTimer = null, presetAnim = 0;
+
+fit(stage);
+scenery(stage, [600, 40]);
+for (let i = 0; i < 20; i++) $('meter').appendChild(document.createElement('div'));
+const bars = [...$('meter').children];
+bars.forEach((b, i) => b.style.height = (30 + i * 3.5) + '%');
+
+function render() {
+  if (!st) return;
+  const live = st.s !== 'paused';
+  fitText($('club'), st.t || CLUB_DEFAULT, 520, 32);
+  $('status').className = live ? 'live' : 'paused';
+  $('status').querySelector('span').textContent = live ? 'LIVE' : 'PAUSED';
+  $('pname').textContent = st.pl || 'No player yet';
+  $('pname').className = st.pl ? '' : 'none';
+  $('lreels').innerHTML = st.r.length === 3 ? st.r.map(r => `<div class="marble">${sym(r)}</div>`).join('')
+                                            : '<div class="marble"></div><div class="marble"></div><div class="marble"></div>';
+  $('llabel').textContent = st.l || 'Waiting for the first spin';
+  $('toymax').textContent = `Max ${st.mx}/20`;
+  bars.forEach((b, i) => b.classList.toggle('capped', i >= st.mx));
+  tick();
+}
+
+// runs twice a second: turn countdown and the toy meter draining
+function tick() {
+  if (!st) return;
+  const t = nowSec();
+  if (!st.pl) $('pturn').textContent = 'Menu → Give HUD to pick someone';
+  else if (st.x > 1) { const left = st.x - t; $('pturn').textContent = left > 0 ? `Turn ends in ${fmt(left)}` : 'Turn over. Give the HUD to someone new.'; }
+  else $('pturn').textContent = 'No time limit';
+
+  const left = st.at + st.sec - t;
+  const running = st.sec > 0 && left > 0 && st.s !== 'paused';
+  const preset = isNaN(+st.lv);
+  let level = running && !preset ? Math.min(+st.lv, st.mx) : 0;
+  if (running && preset) level = Math.round(st.mx / 2 + Math.sin(presetAnim++ / 2) * st.mx / 2);
+  bars.forEach((b, i) => b.classList.toggle('on', i < level));
+  $('toynow').className = running ? '' : 'idle';
+  $('toynow').textContent = running ? (preset ? PRESETS[st.lv] || st.lv : `Level ${level}`) : (st.s === 'paused' ? 'Stopped' : 'Idle');
+  $('timefill').style.width = running ? (left / st.sec * 100) + '%' : '0';
+  $('timetxt').textContent = running ? `${left}s left` : '';
+}
+setInterval(tick, 500);
+
+function apply() {
+  const h = readHash();
+  if (!h.s) return startDemo();
+  clearInterval(demoTimer); demoTimer = null;
+  st = { s: h.s, t: dec(h.t), pl: dec(h.pl), x: +h.x || 0, mx: +h.mx || 20, r: (h.r || '').split(',').filter(x => x !== '').map(Number),
+         o: h.o || '', l: dec(h.l), lv: dec(h.lv), sec: +h.sec || 0, at: +h.at || 0 };
+  render();
+}
+addEventListener('hashchange', apply);
+
+function startDemo() {
+  if (demoTimer) return;
+  const spins = [[[5, 5, 5], 'ZEUS! Full power for 30s', '20', 30], [[2, 2, 2], 'Wild Dionysus for 15s', '14', 15],
+                 [[4, 4, 4], "Poseidon's tide for 20s", 'wave', 20], [[0, 3, 0], 'A gift from the gods (6s)', '6', 6]];
+  let k = 0;
+  const go = () => { const s = spins[k++ % spins.length];
+    st = { s: 'live', t: '', pl: 'Velvet Rose', x: nowSec() + 5 * 3600 + 1234, mx: 15, r: s[0], o: '', l: s[1], lv: s[2], sec: s[3], at: nowSec() }; render(); };
+  go(); demoTimer = setInterval(go, 9000);
+}
+apply();
+</script>
+</body>
+</html>
