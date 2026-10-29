@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screens</title>
+<!-- Landing page for the plain web address, so it doesn't show a 404. Links to each screen's demo. -->
+<link rel="stylesheet" href="theme.css">
+<style>
+  .menu { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; }
+  #club { font-size: 54px; display: inline-block; }
+  .links { display: flex; gap: 18px; }
+  .links a { font-family: var(--title-font); font-weight: 900; font-size: 22px; letter-spacing: 2px; color: #fff; text-decoration: none;
+             padding: 14px 26px; border-radius: 14px; background: #0a0b3d99; border: 2px solid var(--neon-cyan); box-shadow: 0 0 18px #3ff3ff55; }
+  .links a:hover { background: #3ff3ff33; }
+  .note { color: var(--dim); font-weight: 700; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="menu">
+    <div class="title" id="club"></div>
+    <div class="subtitle">Your screens are online</div>
+    <div class="links"><a href="slots.html">Slot HUD</a><a href="board.html">Leaderboard</a><a href="dancer.html">Dancer control</a></div>
+    <div class="note">Each one plays a demo. Use this page's address as WEB_URL.</div>
+  </div>
+</div>
+<script src="club.js"></script>
+<script>
+  fit($('stage'));
+  scenery($('stage'), [600, 40]);
+  fitText($('club'), CLUB_DEFAULT, 700, 54);
+</script>
+</body>
+</html>
