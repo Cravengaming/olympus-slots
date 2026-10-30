@@ -268,7 +268,7 @@ const Sound = (() => {
     src.connect(fl).connect(g).connect(out); src.start(t); src.stop(t + d);
   }
   const arp = (notes, step, o) => notes.forEach((f, i) => tone(f, o.d || .5, Object.assign({}, o, { when: (o.when || 0) + i * step })));
-  return {
+  const api = {
     whoosh() { noise(.6, { v: .25, filter: 'bandpass', f: 400, f2: 2400, q: 1.2, attack: .2 }); },
     tick() { tone(1100 + Math.random() * 400, .03, { type: 'square', v: .03 }); },
     stop() { tone(160, .22, { type: 'triangle', v: .35, slide: .55 }); noise(.08, { v: .15, f: 1500 }); },
@@ -298,6 +298,9 @@ const Sound = (() => {
     twang(n) { for (let i = 0; i < n; i++) { tone(200, .3, { type: 'sawtooth', v: .07, slide: 2.6, when: i * .22 }); noise(.25, { v: .2, filter: 'bandpass', f: 1800, f2: 7000, when: i * .22 }); } },
     sparkle() { arp([1047, 1319, 1568, 2093], .07, { v: .14, d: .7 }); }
   };
+  // Sound must never be able to stop a show
+  Object.keys(api).forEach(k => { const f = api[k]; api[k] = (...a) => { try { f(...a); } catch (e) {} }; });
+  return api;
 })();
 
 // Every outcome gets a show. sub: line under the god's name (default: the god's epithet). sound: play sounds.

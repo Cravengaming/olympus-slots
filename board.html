@@ -58,6 +58,9 @@
   .empty { color: var(--dim); font-weight: 700; font-size: 18px; padding: 30px 10px; text-align: center; }
   .godtext { background: #0a0b3d88; }
 
+  /* shows any page error on the board, since Second Life has no console to read it in */
+  #err { position: absolute; left: 40px; right: 40px; bottom: 2px; z-index: 20; font-size: 13px; font-weight: 700; color: #ffb3b3; text-align: center; white-space: nowrap; overflow: hidden; }
+
   /* tip goals take turns with the latest spins */
   .goal { height: 64px; margin-bottom: 4px; padding: 6px 8px; border-radius: 12px; background: #ffffff0c; }
   .gline { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
@@ -157,7 +160,9 @@
   <div class="tide" id="tide"></div>
   <div class="godtext" id="godtext"></div>
   <canvas class="fx" id="fx" width="1024" height="512"></canvas>
+  <div id="err"></div>
 </div>
+<script>window.onerror = m => { document.getElementById('err').textContent = 'Screen error: ' + m; };</script>
 <script src="club.js"></script>
 <script>
 const stage = $('stage');
@@ -204,7 +209,7 @@ function render(d, animate, fresh) {
 
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
-    let spins = fresh === undefined ? 1 : fresh;
+    let spins = fresh >= 0 ? fresh : 1;
     if (d.hit) spins--;   // the update that carries Olympus Unlocked isn't a spin
     if (d.group.length) { const g = d.group, payer = d.payer; queueShow(() => playGroupShow(g, payer)); }
     else {
@@ -236,10 +241,15 @@ function queueShow(fn) {
   showQueue.push(fn);
   if (!showing) nextShow();
 }
+let showWatch;
 function nextShow() {
+  clearTimeout(showWatch);
   const fn = showQueue.shift();
   showing = !!fn;
-  if (fn) fn();
+  if (!fn) return;
+  // A show that fails, or never finishes, must not block the ones after it
+  showWatch = setTimeout(nextShow, 20000);
+  try { fn(); } catch (e) { $('err').textContent = 'Screen error: ' + e.message; nextShow(); }
 }
 
 // ---- the big reel shows: one tipper's spin, or "spin everyone" with every dancer at once (with sound)
@@ -392,6 +402,9 @@ function apply() {
   const h = readHash();
   if (!('n' in h)) return startDemo();
   clearInterval(demoTimer); demoTimer = null;
+  // If the viewer reloads the page on an update, remember the last spin so its show still plays
+  if (lastN === null) { try { lastN = sessionStorage.getItem('n'); } catch (e) {} }
+  try { sessionStorage.setItem('n', h.n); } catch (e) {}
   if (h.n === lastN) { render(parse(h), false); return; }   // only the tip goals changed
   const animate = lastN !== null;
   // how many spins happened since the last update (the board script batches updates)
