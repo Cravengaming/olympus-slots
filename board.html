@@ -8,6 +8,7 @@
      t=club name, tot=spins.jackpots, n=sequence,
      top=name.points.spins.jackpots,... (best first)
      last=name.reels.outcome.points.dancer,... (newest first; reels like "555")
+     goals=dancer.raised.goal.promise,... (tip goals), hit=dancer.goal.promise (Olympus Unlocked show)
      Names are URL-escaped, so "." and "," inside them never clash. With no "#", it plays a demo.
      Look and symbols come from theme.css and club.js. -->
 <link rel="stylesheet" href="theme.css">
@@ -56,6 +57,28 @@
   .tag.j { background: linear-gradient(90deg, #fff6c2, #ffd23f); color: #4a2a00; box-shadow: 0 0 12px #ffd23f; }
   .empty { color: var(--dim); font-weight: 700; font-size: 18px; padding: 30px 10px; text-align: center; }
   .godtext { background: #0a0b3d88; }
+
+  /* tip goals take turns with the latest spins */
+  .goal { height: 64px; margin-bottom: 4px; padding: 6px 8px; border-radius: 12px; background: #ffffff0c; }
+  .gline { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .gline .name { font-size: 18px; }
+  .amt { font-weight: 800; font-size: 14px; color: var(--gold); white-space: nowrap; }
+  .gbar { height: 9px; margin: 4px 0 3px; border-radius: 5px; background: #ffffff18; overflow: hidden; }
+  .gbar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #ff4fd8, #ffe27a); box-shadow: 0 0 10px #ff4fd8; transition: width .8s; }
+  .gprom { font-size: 13px; font-weight: 700; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Olympus Unlocked: a dancer reached her tip goal */
+  #ushow { position: absolute; inset: 0; z-index: 3; display: none;
+           background: radial-gradient(60% 60% at 50% 50%, #ffd23f33, transparent 70%),
+                       linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
+  #ushow.on { display: block; animation: fadein .4s; }
+  #ushow.out { animation: fadeout .5s forwards; }
+  #ugods { position: absolute; left: 0; right: 0; top: 44px; display: flex; justify-content: center; gap: 34px; font-size: 84px; }
+  #ugods span { animation: rise .7s cubic-bezier(.2, 1.6, .4, 1) both, hover 2s ease-in-out infinite alternate; }
+  @keyframes rise { from { transform: translateY(70px) scale(.3); opacity: 0; } }
+  @keyframes hover { to { translate: 0 -8px; } }
+  #upromise { position: absolute; left: 60px; right: 60px; top: 398px; text-align: center; font-family: var(--title-font); font-weight: 900; font-size: 28px;
+              color: var(--gold); text-shadow: 0 0 12px #ffb300aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* the big reel show played for each tipped spin, over the rankings */
   #show { position: absolute; inset: 0; z-index: 3; display: none;
@@ -116,7 +139,7 @@
 <div class="stage" id="stage">
   <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Hall of Champions</div></div><div id="totals"></div></header>
   <div class="panel" id="left"><h2>FAVORED BY THE GODS</h2><div id="top"></div></div>
-  <div class="panel" id="right"><h2>LATEST SPINS</h2><div id="last"></div></div>
+  <div class="panel" id="right"><h2 id="rtitle">LATEST SPINS</h2><div id="last"></div><div id="goals" style="display:none"></div></div>
   <div id="show">
     <div class="column" style="left:84px;top:124px;height:244px"></div>
     <div class="column" style="right:84px;top:124px;height:244px"></div>
@@ -130,6 +153,7 @@
     <div id="sbanner"><div id="slabel"></div><div id="spts"></div></div>
   </div>
   <div id="gshow"><div id="gwho"></div><div id="gtiles"></div></div>
+  <div id="ushow"><div id="ugods"></div><div id="upromise"></div></div>
   <div class="tide" id="tide"></div>
   <div class="godtext" id="godtext"></div>
   <canvas class="fx" id="fx" width="1024" height="512"></canvas>
@@ -169,18 +193,40 @@ function render(d, animate, fresh) {
     </div>`;
   }).join('') : '<div class="empty">Spins show up here as they happen.</div>';
 
+  // Tip goals
+  $('goals').innerHTML = d.goals.map(g => `<div class="goal">
+      <div class="gline"><span class="name">${esc(g.dancer)}</span><span class="amt">L$${g.raised} / L$${g.goal}</span></div>
+      <div class="gbar"><i style="width:${Math.min(100, g.raised / g.goal * 100)}%"></i></div>
+      <div class="gprom">${esc(g.text) || '&nbsp;'}</div>
+    </div>`).join('');
+  haveGoals = d.goals.length > 0;
+  showRight();
+
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
+    let spins = fresh === undefined ? 1 : fresh;
+    if (d.hit) spins--;   // the update that carries Olympus Unlocked isn't a spin
     if (d.group.length) { const g = d.group, payer = d.payer; queueShow(() => playGroupShow(g, payer)); }
     else {
       // Several spins can land between two updates: show each of them, oldest first
-      for (let k = Math.min(fresh || 1, d.last.length) - 1; k >= 0; k--) {
+      for (let k = Math.min(spins, d.last.length) - 1; k >= 0; k--) {
         const s = d.last[k], label = k === 0 ? d.label : '';
         queueShow(() => playShow(s, label));
       }
     }
   }
+  if (animate && d.hit) { const hit = d.hit; queueShow(() => playUnlock(hit)); }
 }
+
+// The right panel takes turns between the latest spins and the tip goals
+let haveGoals = false, onGoals = false;
+function showRight() {
+  const g = onGoals && haveGoals;
+  $('rtitle').textContent = g ? 'TIP GOALS' : 'LATEST SPINS';
+  $('goals').style.display = g ? 'block' : 'none';
+  $('last').style.display = g ? 'none' : 'block';
+}
+setInterval(() => { onGoals = !onGoals; showRight(); }, 8000);
 
 // Shows wait their turn instead of cutting each other off
 const showQueue = [];
@@ -197,7 +243,7 @@ function nextShow() {
 }
 
 // ---- the big reel shows: one tipper's spin, or "spin everyone" with every dancer at once (with sound)
-const show = $('show'), gshow = $('gshow');
+const show = $('show'), gshow = $('gshow'), ushow = $('ushow');
 const boxes = [...show.querySelectorAll('.win-box')];
 const strips = [...show.querySelectorAll('.strip')];
 const rand = () => Math.random() * GODS.length | 0;
@@ -266,7 +312,7 @@ function endShowLater(el, my, name) {
 function startShow() {
   const my = ++showToken;
   clearTimeout(showTimer);
-  show.className = ''; gshow.className = ''; stage.classList.remove('win');
+  show.className = ''; gshow.className = ''; ushow.className = ''; stage.classList.remove('win');
   return my;
 }
 
@@ -285,6 +331,20 @@ function playShow(s, label) {
     celebrate(stage, fx, s.outcome, $('godtext'), $('tide'), `${s.name} for ${s.dancer}`, true);
     endShowLater(show, my, s.name);
   });
+}
+
+// A dancer reached her tip goal: every god appears, and everything goes off at once
+function playUnlock(hit) {
+  const my = startShow();
+  $('ugods').innerHTML = [5, 4, 3, 2, 0, 1].map((g, i) => `<span style="animation-delay:${i * .12}s, ${i * .2}s">${sym(g)}</span>`).join('');
+  $('upromise').textContent = hit.text;
+  ushow.className = 'on';
+  stage.classList.add('win');
+  celebrate(stage, fx, 'UNLOCK', $('godtext'), $('tide'), `${hit.dancer} reached her L$${hit.goal} goal!`, true);
+  showTimer = setTimeout(() => {
+    ushow.classList.add('out');
+    setTimeout(() => { if (my !== showToken) return; ushow.className = ''; stage.classList.remove('win'); nextShow(); }, 500);
+  }, 9000);
 }
 
 // "Spin everyone": a tile per dancer, all spinning together; the best result gets the big effect
@@ -322,6 +382,8 @@ function parse(h) {
   return {
     title: dec(h.t), spins: +tot[0] || 0, jackpots: +tot[1] || 0, label: dec(h.lab), payer: dec(h.gp),
     group: list(h.grp).map(f => ({ dancer: dec(f[0]), reels: (f[1] || '').split('').map(Number), outcome: f[2] || '', pts: +f[3] || 0 })).filter(g => g.reels.length === 3),
+    goals: list(h.goals).map(f => ({ dancer: dec(f[0]), raised: +f[1] || 0, goal: +f[2] || 1, text: dec(f[3]) })),
+    hit: h.hit ? (f => ({ dancer: dec(f[0]), goal: f[1], text: dec(f[2]) }))(h.hit.split('.')) : null,
     top: list(h.top).map(f => ({ name: dec(f[0]), pts: +f[1] || 0, spins: +f[2] || 0, jp: +f[3] || 0 })),
     last: list(h.last).map(f => ({ name: dec(f[0]), reels: (f[1] || '').split('').map(Number), outcome: f[2] || '', pts: +f[3] || 0, dancer: dec(f[4]) }))
   };
@@ -330,7 +392,7 @@ function apply() {
   const h = readHash();
   if (!('n' in h)) return startDemo();
   clearInterval(demoTimer); demoTimer = null;
-  if (h.n === lastN) return;
+  if (h.n === lastN) { render(parse(h), false); return; }   // only the tip goals changed
   const animate = lastN !== null;
   // how many spins happened since the last update (the board script batches updates)
   const fresh = animate ? Math.max(1, Math.min(5, (+h.n) - (+lastN))) : 0;
@@ -348,7 +410,8 @@ function startDemo() {
                 ['APHRODITE', 30, 3, "Aphrodite's fireworks for 20s"], ['DIONYSUS', 20, 2, 'Wild Dionysus for 15s'],
                 ['ATHENA', 15, 0, "Athena's blessing for 12s"], ['ARTEMIS', 10, 1, 'Moonlight pulses for 10s'],
                 ['PAIR', 5, -1, 'A gift from the gods (8s)'], ['PAIR', 5, -1, 'A gift from the gods (8s)']];
-  const stats = {}, d = { title: '', spins: 0, jackpots: 0, top: [], last: [], group: [] };
+  const stats = {}, d = { title: '', spins: 0, jackpots: 0, top: [], last: [], group: [], hit: null,
+    goals: [{ dancer: 'Luna', raised: 620, goal: 1000, text: 'Lap dance raffle!' }, { dancer: 'Jade', raised: 1900, goal: 2500, text: 'Costume change' }, { dancer: 'Ariel', raised: 150, goal: 500, text: '' }] };
   let k = 0;
   const one = (name, dancer) => {
     const o = k % 9 === 4 ? outs[0] : k % 9 === 7 ? outs[1] : outs[2 + (Math.random() * (outs.length - 2) | 0)];
@@ -367,6 +430,7 @@ function startDemo() {
   const roll = (anim) => {
     const name = names[Math.random() * names.length | 0];
     d.group = [];
+    d.hit = anim && r % 5 === 4 ? { dancer: 'Luna', goal: 1000, text: 'Lap dance raffle!' } : null;
     if (anim && r++ % 3 === 1) { d.payer = name; d.group = ['Ariel', 'Luna', 'Jade', 'Nyx', 'Calypso'].map(x => one(name, x)); }
     else one(name, dancers[Math.random() * dancers.length | 0]);
     d.top = Object.values(stats).sort((x, y) => y.pts - x.pts).slice(0, 5);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Control</title>
 <!-- Dancer controller screen. The controller script drives it through the address after "#":
-     s=live|paused, t=club name, pl=current tipper, q=spins waiting, mx=max level, n=sequence,
+     s=live|paused, t=club name, pl=current tipper, q=spins waiting, gr/gg/gt=tip goal raised, goal, promise, mx=max level, n=sequence,
      r=last reels "a,b,c", o=outcome, l=label, lv=level or preset name, sec=reward seconds, at=reward start (unix).
      With no "#", it plays a demo. Look and symbols come from theme.css and club.js. -->
 <link rel="stylesheet" href="theme.css">
@@ -24,7 +24,10 @@
   #player { left: 34px; top: 96px; width: 420px; height: 160px; }
   #pname { font-weight: 800; font-size: 32px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #pname.none { color: var(--dim); font-size: 24px; }
-  #pturn { margin-top: 8px; font-weight: 700; font-size: 17px; color: #ffd6f6; }
+  #pturn { margin-top: 4px; font-weight: 700; font-size: 16px; color: #ffd6f6; }
+  #pgoal { margin-top: 8px; font-weight: 800; font-size: 14px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #pbar { margin-top: 3px; height: 8px; border-radius: 4px; background: #ffffff18; overflow: hidden; display: none; }
+  #pbar i { display: block; height: 100%; background: linear-gradient(90deg, #ff4fd8, #ffe27a); transition: width .8s; }
   #last { left: 34px; top: 268px; width: 420px; height: 176px; }
   .mini { display: flex; gap: 8px; margin: 6px 0 10px; }
   .mini div { width: 72px; height: 76px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 54px;
@@ -50,7 +53,7 @@
 <body>
 <div class="stage" id="stage">
   <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Control</div></div><div id="status" class="live"><i></i><span>LIVE</span></div></header>
-  <div class="card" id="player"><h2>NOW SPINNING</h2><div id="pname"></div><div id="pturn"></div></div>
+  <div class="card" id="player"><h2>NOW SPINNING</h2><div id="pname"></div><div id="pturn"></div><div id="pgoal"></div><div id="pbar"><i></i></div></div>
   <div class="card" id="last"><h2>LAST SPIN</h2><div class="mini" id="lreels"></div><div id="llabel"></div></div>
   <div class="card" id="toy"><h2>YOUR TOY</h2><div id="meter"></div>
     <div id="toyline"><div id="toynow"></div><div id="toymax"></div></div>
@@ -80,6 +83,9 @@ function render() {
   $('lreels').innerHTML = st.r.length === 3 ? st.r.map(r => `<div class="marble">${sym(r)}</div>`).join('')
                                             : '<div class="marble"></div><div class="marble"></div><div class="marble"></div>';
   $('llabel').textContent = st.l || 'Waiting for the first spin';
+  $('pgoal').textContent = st.gg > 0 ? `Goal: L$${st.gr} / L$${st.gg}${st.gt ? ' · ' + st.gt : ''}` : 'Menu → Tip Goal to set a goal';
+  $('pbar').style.display = st.gg > 0 ? 'block' : 'none';
+  $('pbar').firstChild.style.width = st.gg > 0 ? Math.min(100, st.gr / st.gg * 100) + '%' : '0';
   $('toymax').textContent = `Max ${st.mx}/20`;
   bars.forEach((b, i) => b.classList.toggle('capped', i >= st.mx));
   tick();
@@ -115,7 +121,7 @@ function apply() {
   const h = readHash();
   if (!h.s) return startDemo();
   clearInterval(demoTimer); demoTimer = null;
-  st = { s: h.s, t: dec(h.t), pl: dec(h.pl), q: +h.q || 0, mx: +h.mx || 20, r: (h.r || '').split(',').filter(x => x !== '').map(Number),
+  st = { s: h.s, t: dec(h.t), pl: dec(h.pl), q: +h.q || 0, gr: +h.gr || 0, gg: +h.gg || 0, gt: dec(h.gt), mx: +h.mx || 20, r: (h.r || '').split(',').filter(x => x !== '').map(Number),
          o: h.o || '', l: dec(h.l), lv: dec(h.lv), sec: +h.sec || 0, at: +h.at || 0 };
   render();
 }
@@ -129,7 +135,7 @@ function startDemo() {
                  [[0, 3, 0], 'A teasing gift from the gods (8s)', 'tease', 8]];
   let k = 0;
   const go = () => { const s = spins[k++ % spins.length];
-    st = { s: 'live', t: '', pl: 'Velvet Rose', q: 3, mx: 20, r: s[0], o: '', l: s[1], lv: s[2], sec: s[3], at: nowSec() }; render(); };
+    st = { s: 'live', t: '', pl: 'Velvet Rose', q: 3, gr: 620, gg: 1000, gt: 'Lap dance raffle!', mx: 20, r: s[0], o: '', l: s[1], lv: s[2], sec: s[3], at: nowSec() }; render(); };
   go(); demoTimer = setInterval(go, 9000);
 }
 apply();

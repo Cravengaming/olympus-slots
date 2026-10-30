@@ -82,6 +82,7 @@ const RHYTHMS = {
   party: { label: 'Party beat', ms: 235, steps: '16;4;12;4;18;4;12;4;16;4;12;4;18;4;12;4;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;20;20' },
   climb: { label: 'Disciplined climb', ms: 500, steps: '6;6;6;8;8;8;10;10;10;12;12;12;14;14;14;16;16;16;18;18;18;18;18;18' },
   arrows: { label: 'Volley of arrows', ms: 150, steps: '20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;20;20;3;3' },
+  olympus: { label: 'Olympus Unlocked', ms: 600, steps: '12;14;16;18;20;20;14;16;18;20;20;20;14;18;20;20;20;20;16;20;20;20;20;20;20;8;20;8;20;8;20;20;20;20;20;20;12;20;12;20;12;20;20;20;20;20;20;20;20;20' },
   tease: { label: 'Tease', ms: 300, steps: '3;6;3;7;4;7;4;8;5;8;5;9;5;9;6;9;6;10;6;10;7;10;7;11;7;11;8' }
 };
 Object.values(RHYTHMS).forEach(r => r.steps = r.steps.split(';').map(Number));
@@ -359,6 +360,18 @@ function celebrate(stage, fx, outcome, godtext, tide, sub, sound) {
       show('artemis', 'ARTEMIS', 3800);
       break;
     }
+    case 'UNLOCK':
+      // a tip goal reached: every god's effect at once
+      replay(stage, 'flash', 1600); replay(stage, 'quake', 1400); replay(tide, 'show', 4300); wash('#ffe27a', 2800);
+      [0, 700, 1600, 2600, 3800, 5200].forEach(w => later(w, () => fx.lightning(4)));
+      fx.burst(160, ['bubble'], ['#d8ffff'], 'bottom');
+      fx.arrows(8);
+      later(500, () => fx.burst(300, ['coin', 'star', 'petal', 'heart', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#ff2f6e', '#3ff3ff'], 'top'));
+      later(2500, () => fx.burst(260, ['confetti', 'coin', 'heart', 'star'], ['#c77dff', '#ffe27a', '#ff4fd8', '#ffffff'], 'center'));
+      later(5000, () => fx.burst(300, ['coin', 'star', 'petal', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#3ff3ff'], 'top'));
+      if (S) { S.thunder(); later(900, () => S.fanfare()); later(2400, () => S.harp([523, 659, 784, 1047, 1319, 1568, 2093])); later(3600, () => S.fanfare()); later(5200, () => S.thunder()); }
+      show('unlock', 'OLYMPUS UNLOCKED', 8800);
+      break;
     case 'PAIR':
       fx.burst(110, ['star', 'spark'], ['#ffe27a', '#ffffff', '#ff4fd8', '#3ff3ff'], 'center');
       wash('#ffe27a', 1400);

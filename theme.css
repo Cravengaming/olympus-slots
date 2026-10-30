@@ -115,6 +115,9 @@ body { font-family: var(--body-font); color: var(--ink); }
 .godtext.poseidon .big { color: #e6ffff; text-shadow: 0 0 8px #fff, 0 0 20px #3ff3ff, 0 0 44px #1a8cff; }
 .godtext.aphrodite .big { color: #ffe6f6; font-size: 104px; text-shadow: 0 0 8px #fff, 0 0 20px #ff4fd8, 0 0 44px #ff2f6e; }
 .godtext.dionysus .big { color: #f3d2ff; font-size: 110px; text-shadow: 0 0 8px #fff, 0 0 20px #c77dff, 0 0 44px #7a1fd0; }
+.godtext.unlock { justify-content: center; }
+.godtext.unlock .big { color: #fff8d0; font-size: 82px; letter-spacing: 4px; text-align: center; text-shadow: 0 0 8px #fff, 0 0 20px #ffd23f, 0 0 40px #ff4fd8, 0 0 70px #3ff3ff; }
+.godtext.unlock .sub { font-size: 26px; letter-spacing: 3px; }
 .godtext.athena .big { color: #f4f6ff; text-shadow: 0 0 8px #fff, 0 0 20px #c9d4ff, 0 0 44px #6a7cff; }
 .godtext.artemis .big { color: #f6f2ff; font-size: 120px; text-shadow: 0 0 8px #fff, 0 0 20px #c3b4ff, 0 0 44px #8a6bff; }
 @keyframes zoom { from { transform: scale(0) rotate(-6deg); opacity: 0; } }
