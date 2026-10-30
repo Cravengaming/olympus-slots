@@ -59,7 +59,6 @@
   .godtext { background: #0a0b3d88; }
 
   /* shows any page error on the board, since Second Life has no console to read it in */
-  #dbg { position: absolute; left: 0; right: 0; top: 0; z-index: 30; padding: 2px 8px; font: 700 15px monospace; color: #fff; background: #000c; text-align: center; white-space: nowrap; }
   #err { position: absolute; left: 40px; right: 40px; bottom: 2px; z-index: 20; font-size: 13px; font-weight: 700; color: #ffb3b3; text-align: center; white-space: nowrap; overflow: hidden; }
 
   /* tip goals take turns with the latest spins */
@@ -162,7 +161,6 @@
   <div class="godtext" id="godtext"></div>
   <canvas class="fx" id="fx" width="1024" height="512"></canvas>
   <div id="err"></div>
-  <div id="dbg">starting</div>
 </div>
 <script>window.onerror = m => { document.getElementById('err').textContent = 'Screen error: ' + m; };</script>
 <script src="club.js"></script>
@@ -174,15 +172,6 @@ let lastN = null, demoTimer = null;
 
 fit(stage);
 scenery(stage, [590, 38]);
-
-// Temporary readout for finding why shows don't play in Second Life
-const dbg = { loads: '?', updates: 0, spinUpdates: 0, started: 0, ended: 0, frames: 0, fps: 0 };
-try { dbg.loads = (+sessionStorage.getItem('loads') || 0) + 1; sessionStorage.setItem('loads', dbg.loads); } catch (e) { dbg.loads = 'blocked'; }
-(function frame() { dbg.frames++; requestAnimationFrame(frame); })();
-function showDbg() {
-  $('dbg').textContent = `v25 loads ${dbg.loads} | updates ${dbg.updates} | spin updates ${dbg.spinUpdates} | n ${lastN} | shows ${dbg.started}/${dbg.ended} | ${showing ? 'busy' : 'idle'} | waiting ${showQueue.length} | reels ${show.className || 'off'} | fps ${dbg.fps}`;
-}
-setInterval(() => { dbg.fps = dbg.frames; dbg.frames = 0; showDbg(); }, 1000);
 
 function render(d, animate, fresh) {
   fitText($('club'), d.title || CLUB_DEFAULT, 400, 36);
@@ -218,8 +207,6 @@ function render(d, animate, fresh) {
   haveGoals = d.goals.length > 0;
   showRight();
 
-  dbg.updates++;
-  if (animate) dbg.spinUpdates++;
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
     let spins = fresh >= 0 ? fresh : 1;
@@ -262,7 +249,6 @@ function nextShow() {
   if (!fn) return;
   // A show that fails, or never finishes, must not block the ones after it
   showWatch = setTimeout(nextShow, 20000);
-  dbg.started++;
   try { fn(); } catch (e) { $('err').textContent = 'Screen error: ' + e.message; nextShow(); }
 }
 
@@ -328,7 +314,6 @@ function endShowLater(el, my, name) {
       [...document.querySelectorAll('.row')].forEach(row => {
         if (row.querySelector('.name').textContent === name) { row.classList.remove('hot'); void row.offsetWidth; row.classList.add('hot'); }
       });
-      dbg.ended++;
       nextShow();
     }, 500);
   }, showQueue.length ? 4000 : 6500);
