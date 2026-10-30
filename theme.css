@@ -25,7 +25,7 @@ body { font-family: var(--body-font); color: var(--ink); }
 /* 1024x512 scene, scaled to fit by club.js */
 .stage {
   position: absolute; left: 50%; top: 50%; width: 1024px; height: 512px; transform-origin: center;
-  border-radius: 26px; overflow: hidden;
+  overflow: hidden;   /* square corners: Second Life can't show see-through parts of a web screen */
   background:
     radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
     radial-gradient(60% 28% at 50% 106%, #3ff3ff66, transparent 70%),

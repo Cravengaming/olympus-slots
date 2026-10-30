@@ -90,8 +90,14 @@ function fitText(el, text, maxW, px) {
   while (el.scrollWidth > maxW && px > 14) el.style.fontSize = (px -= 2) + 'px';
 }
 
+// Fills the screen edge to edge. In Second Life the screen is always 2:1, so stretching is invisible;
+// in a browser window of a very different shape it keeps the proportions instead.
 function fit(stage) {
-  const go = () => { const k = Math.min(innerWidth / 1024, innerHeight / 512); stage.style.transform = `translate(-50%, -50%) scale(${k})`; };
+  const go = () => {
+    const kx = innerWidth / 1024, ky = innerHeight / 512, off = Math.abs(kx / ky - 1);
+    const k = Math.min(kx, ky);
+    stage.style.transform = off < .15 ? `translate(-50%, -50%) scale(${kx}, ${ky})` : `translate(-50%, -50%) scale(${k})`;
+  };
   addEventListener('resize', go); go();
 }
 
