@@ -73,6 +73,19 @@ const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const dec = s => { try { return decodeURIComponent(s || ''); } catch (e) { return s || ''; } };
 const nowSec = () => Math.floor(Date.now() / 1000);
+// Each god's signature rhythm, for the control screen's toy meter.
+// Keep in sync with RHYTHMS in the controller script.
+const RHYTHMS = {
+  thunder: { label: 'Thunderstorm', ms: 600, steps: '6;8;6;9;7;20;20;8;10;7;9;20;20;20;9;11;8;12;10;20;18;20;12;14;16;18;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20' },
+  tide: { label: 'Rolling tide', ms: 400, steps: '4;6;9;12;15;16;15;12;9;6;6;9;12;15;18;19;18;15;12;9;8;11;14;17;20;20;20;17;14;11;8;11;14;17;20;20;20;17;14;11;8;11;14;17;20;20;20;17;14;11' },
+  heart: { label: 'Heartbeat', ms: 200, steps: '14;3;11;0;0;0;14;3;11;0;0;0;14;3;11;0;0;0;17;4;14;0;0;17;4;14;0;0;17;4;14;0;0;17;4;14;0;0;20;6;17;0;20;6;17;0;20;6;17;0' },
+  party: { label: 'Party beat', ms: 235, steps: '16;4;12;4;18;4;12;4;16;4;12;4;18;4;12;4;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;20;20' },
+  climb: { label: 'Disciplined climb', ms: 500, steps: '6;6;6;8;8;8;10;10;10;12;12;12;14;14;14;16;16;16;18;18;18;18;18;18' },
+  arrows: { label: 'Volley of arrows', ms: 150, steps: '20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;20;20;3;3' },
+  tease: { label: 'Tease', ms: 300, steps: '4;8;4;9;5;10;5;11;6;12;6;13;7;14;7;15;8;15;9;16;9;16;10;17;10;17;12' }
+};
+Object.values(RHYTHMS).forEach(r => r.steps = r.steps.split(';').map(Number));
+
 const fmt = s => { const h = s / 3600 | 0, m = (s % 3600) / 60 | 0; return h ? `${h}h ${m}m` : m ? `${m}m ${s % 60}s` : `${s}s`; };
 
 // The scripts put the screen's state after "#". Values stay escaped until read, so

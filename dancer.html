@@ -85,7 +85,7 @@ function render() {
   tick();
 }
 
-// runs twice a second: the toy meter draining
+// runs ten times a second: the toy meter follows the rhythm as it plays, and the time bar drains
 function tick() {
   if (!st) return;
   const t = nowSec();
@@ -93,16 +93,23 @@ function tick() {
 
   const left = st.at + st.sec - t;
   const running = st.sec > 0 && left > 0 && st.s !== 'paused';
-  const preset = isNaN(+st.lv);
-  let level = running && !preset ? Math.min(+st.lv, st.mx) : 0;
-  if (running && preset) level = Math.round(st.mx / 2 + Math.sin(presetAnim++ / 2) * st.mx / 2);
+  const rhythm = RHYTHMS[st.lv];
+  const preset = !rhythm && isNaN(+st.lv);
+  let level = running && !preset && !rhythm ? Math.min(+st.lv, st.mx) : 0;
+  if (running && rhythm) {
+    // where the toy is in its looping pattern right now, scaled like the controller does
+    const step = Math.floor((Date.now() / 1000 - st.at) * 1000 / rhythm.ms) % rhythm.steps.length;
+    level = Math.floor(rhythm.steps[Math.max(0, step)] * st.mx / 20);
+  }
+  else if (running && preset) level = Math.round(st.mx / 2 + Math.sin(presetAnim++ / 10) * st.mx / 2);
   bars.forEach((b, i) => b.classList.toggle('on', i < level));
   $('toynow').className = running ? '' : 'idle';
-  $('toynow').textContent = running ? (preset ? PRESETS[st.lv] || st.lv : `Level ${level}`) : (st.s === 'paused' ? 'Stopped' : 'Idle');
+  $('toynow').textContent = !running ? (st.s === 'paused' ? 'Stopped' : 'Idle')
+    : rhythm ? rhythm.label : preset ? PRESETS[st.lv] || st.lv : `Level ${level}`;
   $('timefill').style.width = running ? (left / st.sec * 100) + '%' : '0';
   $('timetxt').textContent = running ? `${left}s left` : '';
 }
-setInterval(tick, 500);
+setInterval(tick, 100);
 
 function apply() {
   const h = readHash();
@@ -116,11 +123,13 @@ addEventListener('hashchange', apply);
 
 function startDemo() {
   if (demoTimer) return;
-  const spins = [[[5, 5, 5], 'ZEUS! Full power for 30s', '20', 30], [[2, 2, 2], 'Wild Dionysus for 15s', '14', 15],
-                 [[4, 4, 4], "Poseidon's tide for 20s", 'wave', 20], [[0, 3, 0], 'A gift from the gods (8s)', '8', 8]];
+  const spins = [[[5, 5, 5], 'ZEUS! Thunderstorm for 30s', 'thunder', 30], [[3, 3, 3], "Aphrodite's heartbeat for 20s", 'heart', 20],
+                 [[4, 4, 4], "Poseidon's rolling tide for 20s", 'tide', 20], [[2, 2, 2], "Dionysus' party beat for 15s", 'party', 15],
+                 [[1, 1, 1], "Artemis' volley of arrows for 10s", 'arrows', 10], [[0, 0, 0], "Athena's climb for 12s", 'climb', 12],
+                 [[0, 3, 0], 'A teasing gift from the gods (8s)', 'tease', 8]];
   let k = 0;
   const go = () => { const s = spins[k++ % spins.length];
-    st = { s: 'live', t: '', pl: 'Velvet Rose', q: 3, mx: 15, r: s[0], o: '', l: s[1], lv: s[2], sec: s[3], at: nowSec() }; render(); };
+    st = { s: 'live', t: '', pl: 'Velvet Rose', q: 3, mx: 20, r: s[0], o: '', l: s[1], lv: s[2], sec: s[3], at: nowSec() }; render(); };
   go(); demoTimer = setInterval(go, 9000);
 }
 apply();
