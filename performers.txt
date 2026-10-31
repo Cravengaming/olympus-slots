@@ -1,4 +1,4 @@
-# Performer Finder roster. Edit this file to change what the finder HUD shows.
+# Harmonia roster. Edit this file to change what The Escort Discovery Experience HUD shows.
 #
 # - Lines starting with # are notes and are ignored.
 # - Each performer starts with a NAME line and keeps going until the next NAME.
@@ -17,9 +17,10 @@
 # - KEY is the performer's avatar key. It's needed for Request Booking and the live status.
 #   Without it, the profile still shows but the person shows as offline.
 
-CLUB: Olympus
-TITLE: Discover Performers
-TAGLINE: Talent · Fantasy · Connection
+CLUB: Harmonia
+TITLE: Harmonia
+SUBTITLE: The Escort Discovery Experience
+TAGLINE: Your desires. Your needs. Your perfect match.
 
 KINKS: Submissive, Bimbo, Homewrecker, Switch, Findom, Babygirl, Petplay, Cum Slut, Anal, Hotwife, Voyeur / Exhibition, Pain Slut, Power Bottom, Breeding, Puppy, Kitten, Bunny, JOI, Mommy, Good Girl, Waifu, Vanilla / Soft Play, BDSM, Feet / Footwear, Praise / Worship, Hypnosis / Mind Games, Size Fantasy, Tribute, Cuck, Group Play, Unicorn, Public, Leather / Latex, Humiliation Play, Throat Goat, Size Queen, Domme, Roleplay, Slow Burn
 INTERESTS: Stoner, Party, Cooking / Foodie, Fitness, Gothic / Alternative, Sci-Fi / Cyberpunk, Gamer / Nerdy, Photography / Modeling, Sports, Text, Voice, Anime, Shopping, Music, Deep Talks, Art, Reading, Movies, Outdoors, Travel / Adventure, Dancing, Cabaret, VIP Shows, Cosplay
@@ -39,7 +40,7 @@ ABOUT: A seductive blend of darkness and elegance. Nyx brings high-energy perfor
 MORE: Sample text. Replace this with the longer story: what a booking with this performer is like, favorite scenes, what they love to do on stage, and anything a patron should know first.
 
 NAME: Luna Maré
-KEY: aef51a4c-94b3-448d-9564-c8753a5d1576
+KEY:
 PHOTO: performers/luna.jpg
 FULL: performers/luna.jpg
 KINKS: Roleplay

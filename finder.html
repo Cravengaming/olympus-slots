@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Discover Performers</title>
+<title>Harmonia</title>
 <!-- Performer finder screen. Everything about the performers comes from performers.txt.
      The finder HUD script drives it through the address after "#":
      u=the HUD's web address (Close, Request Booking, Profile, Website and Notecard clicks are sent there),
@@ -31,7 +31,7 @@
   #plaque { position: absolute; left: 50%; top: 12px; width: 452px; height: 56px; margin-left: -226px; z-index: 3; border-radius: 28px; text-align: center; padding-top: 6px;
             background: linear-gradient(#20145bf7, #0d0b38f7); border: 1.5px solid var(--trim); box-shadow: 0 0 0 3px #0b0a30, 0 0 0 4px #d9b45b77, 0 0 18px #ff4fd855; }
   #title { font-family: var(--title-font); font-weight: 700; font-size: 25px; letter-spacing: 4px; line-height: 1.15; color: #fff; text-transform: uppercase; text-shadow: 0 0 10px #b26bff; white-space: nowrap; }
-  #tagline { font-weight: 700; font-size: 9px; letter-spacing: 4px; color: var(--dim); text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
+  #subtitle { font-weight: 700; font-size: 9px; letter-spacing: 4px; color: var(--dim); text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
 
   .pill { height: 30px; padding: 0 14px; border-radius: 15px; border: 1px solid #d9b45b99; background: #0d0b38e6; font-weight: 700; font-size: 12px; }
   .pill:hover { border-color: var(--neon-cyan); box-shadow: 0 0 10px #3ff3ff66; }
@@ -157,14 +157,14 @@
   <div class="frieze"></div>
   <div class="column l" style="height:440px"></div>
   <div class="column r" style="height:440px"></div>
-  <div id="plaque"><div id="title"></div><div id="tagline"></div></div>
+  <div id="plaque"><div id="title"></div><div id="subtitle"></div></div>
   <button class="pill" id="back">‹ Change My Picks</button>
   <div id="found"></div>
   <div id="pager"><button class="pill" id="pgup" aria-label="Previous page">‹</button><span id="pgtxt"></span><button class="pill" id="pgdn" aria-label="Next page">›</button></div>
   <button class="pill" id="close" aria-label="Close">×</button>
 
   <section id="ask">
-    <h2>What are you in the mood for?</h2>
+    <h2 id="tagline"></h2>
     <div id="groups"></div>
     <div id="cta"><div id="count"></div><button class="act hot" id="go">Find My Match</button><button class="act cool" id="all">Browse Everyone</button></div>
   </section>
@@ -233,8 +233,9 @@ function readRoster(text) {
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
   GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
   club = info.CLUB || 'club';
-  $('title').textContent = info.TITLE || 'Discover Performers';
-  document.title = info.TITLE || 'Discover Performers';
+  $('title').textContent = info.TITLE || 'Harmonia';
+  document.title = info.TITLE || 'Harmonia';
+  $('subtitle').textContent = info.SUBTITLE || '';
   $('tagline').textContent = info.TAGLINE || '';
 }
 
