@@ -6,7 +6,7 @@
 <title>Discover Performers</title>
 <!-- Performer finder screen. Everything about the performers comes from performers.txt.
      The finder HUD script drives it through the address after "#":
-     u=the HUD's web address (Close, Request Booking and Profile clicks are sent there),
+     u=the HUD's web address (Close, Request Booking, Profile and Rates clicks are sent there),
      st=one digit per performer in file order (2 performing now, 1 in the club, 0 away),
      ack=<click number>.<result> (0 done, 1 too soon, 2 no avatar key for that performer).
      With no "#", it runs as a demo. Look comes from theme.css and club.js. -->
@@ -157,7 +157,7 @@
     <div class="glass" id="more">
       <div id="mname"></div><div class="stat" id="mstat"></div>
       <div id="mtext"></div>
-      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act hot" id="mbook">Request Booking</button></div>
+      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act cool" id="mrates">Rates In Chat</button><button class="act hot" id="mbook">Request Booking</button></div>
     </div>
     <div id="photo">
       <div class="shot" id="bigshot"></div>
@@ -198,6 +198,7 @@ function readRoster(text) {
     else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = list(v);
     else if (k === 'ABOUT') p.about = v;
     else if (k === 'MORE') p.more = v;
+    else if (k === 'RATES') p.rates = p.rates || !!v;
   });
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
   GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
@@ -303,6 +304,7 @@ function openMore() {
   const row = (label, tags) => tags.length ? `<div class="mrow"><b>${label}</b><div class="chips">${tags.map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>` : '';
   $('mtext').innerHTML = `<p>${esc(sel.about)}</p>${sel.more ? `<p>${esc(sel.more)}</p>` : ''}`
     + row('Kinks', sel.kinks) + row('Interests', sel.interests) + row('Vibes', sel.vibes);
+  $('mrates').style.display = sel.rates ? '' : 'none';
   $('more').classList.add('show');
 }
 function closeMore() { $('more').classList.remove('show'); }
@@ -374,6 +376,7 @@ $('actions').addEventListener('click', e => {
 $('mback').addEventListener('click', closeMore);
 $('mbook').addEventListener('click', () => { closeMore(); bookState('confirm'); });
 $('mprofile').addEventListener('click', () => { tellHud('profile', sel.i); $('mprofile').textContent = 'Sent To Chat ✓'; setTimeout(() => $('mprofile').textContent = 'Profile Link In Chat', 3000); });
+$('mrates').addEventListener('click', () => { tellHud('rates', sel.i); $('mrates').textContent = 'Sent To Chat ✓'; setTimeout(() => $('mrates').textContent = 'Rates In Chat', 3000); });
 
 // Live status and answers from the HUD script
 function apply() {
