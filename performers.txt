@@ -1,0 +1,76 @@
+# Performer Finder roster. Edit this file to change what the finder HUD shows.
+#
+# - Lines starting with # are notes and are ignored.
+# - Each performer starts with a NAME line and keeps going until the next NAME.
+# - KINKS, INTERESTS and VIBES are lists separated by commas. The choices on the
+#   finder's first screen are built from these, so a new word here becomes a new button.
+#   Spell a word the same way each time so people match on it.
+# - PHOTO is the small picture on the card. FULL is one or more big pictures, separated by commas.
+#   Use a file in the performers folder, or a full web address starting with https://
+# - ABOUT is the short description. MORE is the longer one behind Learn More. Keep each on one line.
+# - KEY is the performer's avatar key. It's needed for Request Booking and the live status.
+#   Without it, the profile still shows but the person shows as offline.
+
+CLUB: Olympus
+TITLE: Discover Performers
+TAGLINE: Talent · Fantasy · Connection
+
+NAME: Nyx Vespera
+KEY:
+PHOTO: performers/nyx.jpg
+FULL: performers/nyx-full.jpg, performers/nyx.jpg
+KINKS: Domme, Roleplay, Tease
+INTERESTS: Cabaret, VIP Shows
+VIBES: Gothic, Elegant, Mysterious
+ABOUT: A seductive blend of darkness and elegance. Nyx brings high-energy performances, immersive roleplay, and a touch of the divine to every show.
+MORE: Sample text. Replace this with the longer story: what a booking with this performer is like, favorite scenes, what they love to do on stage, and anything a patron should know first.
+
+NAME: Luna Maré
+KEY:
+PHOTO: performers/luna.jpg
+FULL: performers/luna.jpg
+KINKS: Tease, Roleplay
+INTERESTS: Cosplay, VIP Shows
+VIBES: Romantic, Dreamy, Sweet
+ABOUT: Soft moonlight and slow smiles. Luna makes every guest feel like the only person in the room.
+MORE: Sample text. Replace this with the longer story for this performer.
+
+NAME: Seraphine Blue
+KEY:
+PHOTO: performers/seraphine.jpg
+FULL: performers/seraphine.jpg
+KINKS: Roleplay, Slow Burn
+INTERESTS: Cabaret, VIP Shows, Conversation
+VIBES: Romantic, Elegant
+ABOUT: Old Hollywood glamour with a wicked sense of humor. Seraphine lives for a long conversation and a slower pace.
+MORE: Sample text. Replace this with the longer story for this performer.
+
+NAME: Raven Kells
+KEY:
+PHOTO: performers/raven.jpg
+FULL: performers/raven.jpg
+KINKS: Domme, Roleplay
+INTERESTS: VIP Shows, Live Music
+VIBES: Gothic, Fiery, Bold
+ABOUT: Red hair, sharp wit, and absolutely in charge. Raven decides how the night goes, and you'll thank her for it.
+MORE: Sample text. Replace this with the longer story for this performer.
+
+NAME: Eden Kaine
+KEY:
+PHOTO: performers/eden.jpg
+FULL: performers/eden.jpg
+KINKS: Tease, Roleplay, Slow Burn
+INTERESTS: Cosplay, Gaming
+VIBES: Playful, Sweet, Romantic
+ABOUT: Quick to laugh and quicker to dare you. Eden turns any quiet night into a game you want to keep playing.
+MORE: Sample text. Replace this with the longer story for this performer.
+
+NAME: Violet Saint
+KEY:
+PHOTO: performers/violet.jpg
+FULL: performers/violet.jpg
+KINKS: Tease
+INTERESTS: Cabaret, Cosplay, VIP Shows
+VIBES: Playful, Bold, Dreamy
+ABOUT: A showgirl from curls to heels. Violet loves a spotlight, a costume change, and a room that cheers.
+MORE: Sample text. Replace this with the longer story for this performer.

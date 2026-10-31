@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discover Performers</title>
+<!-- Performer finder screen. Everything about the performers comes from performers.txt.
+     The finder HUD script drives it through the address after "#":
+     u=the HUD's web address (Close, Request Booking and Profile clicks are sent there),
+     st=one digit per performer in file order (2 performing now, 1 in the club, 0 away),
+     ack=<click number>.<result> (0 done, 1 too soon, 2 no avatar key for that performer).
+     With no "#", it runs as a demo. Look comes from theme.css and club.js. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap">
+<link rel="stylesheet" href="theme.css">
+<style>
+  :root { --serif: "Cormorant Garamond", Georgia, serif; --trim: #d9b45b; --panel: linear-gradient(160deg, #1b1149f5, #0b0a30f5); }
+  .key, .pool { display: none; }
+  .neon { inset: 5px; border-radius: 14px; }
+  button { font-family: var(--body-font); color: var(--ink); cursor: pointer; }
+
+  /* marble hall around the panels */
+  .frieze { position: absolute; left: 0; right: 0; top: 0; height: 15px; background: repeating-linear-gradient(90deg, #fbf8ff 0 12px, #d6cdee 12px 14px); box-shadow: 0 2px 14px #ff4fd877; }
+  .frieze::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; background: linear-gradient(90deg, #ff4fd8, #3ff3ff, #ff4fd8); box-shadow: 0 0 10px #ff4fd8; }
+  .column { width: 24px; top: 28px; }
+  .column.l { left: 18px; }
+  .column.r { right: 18px; }
+  .column .vine { left: -11px; transform: scaleX(.62); transform-origin: 0 0; }
+
+  .glass { background: var(--panel); border: 1px solid #d9b45b99; border-radius: 12px; box-shadow: 0 0 0 1px #0007, 0 6px 18px #0007, inset 0 0 26px #ff4fd812; }
+
+  #plaque { position: absolute; left: 50%; top: 12px; width: 452px; height: 56px; margin-left: -226px; z-index: 3; border-radius: 28px; text-align: center; padding-top: 6px;
+            background: linear-gradient(#20145bf7, #0d0b38f7); border: 1.5px solid var(--trim); box-shadow: 0 0 0 3px #0b0a30, 0 0 0 4px #d9b45b77, 0 0 18px #ff4fd855; }
+  #title { font-family: var(--title-font); font-weight: 700; font-size: 25px; letter-spacing: 4px; line-height: 1.15; color: #fff; text-transform: uppercase; text-shadow: 0 0 10px #b26bff; white-space: nowrap; }
+  #tagline { font-weight: 700; font-size: 9px; letter-spacing: 4px; color: var(--dim); text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
+
+  .pill { height: 30px; padding: 0 14px; border-radius: 15px; border: 1px solid #d9b45b99; background: #0d0b38e6; font-weight: 700; font-size: 12px; }
+  .pill:hover { border-color: var(--neon-cyan); box-shadow: 0 0 10px #3ff3ff66; }
+  #close { position: absolute; right: 56px; top: 25px; z-index: 3; width: 30px; padding: 0; font-size: 16px; line-height: 1; }
+  #back { position: absolute; left: 56px; top: 25px; z-index: 3; }
+  #found { position: absolute; left: 200px; top: 25px; width: 96px; z-index: 3; height: 30px; line-height: 30px; font-weight: 700; font-size: 12px; color: var(--gold); white-space: nowrap; }
+  #pager { position: absolute; right: 96px; top: 25px; z-index: 3; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; }
+  #pager button { width: 30px; padding: 0; font-size: 15px; }
+  #pager button:disabled { opacity: .35; box-shadow: none; }
+
+  section { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: none; }
+  section.show { display: block; }
+
+  /* first screen: what are you in the mood for? */
+  #ask h2 { position: absolute; left: 56px; right: 56px; top: 76px; margin: 0; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 29px; color: #fff; text-shadow: 0 0 12px #ff4fd8aa; }
+  #ask p { position: absolute; left: 56px; right: 56px; top: 113px; margin: 0; text-align: center; font-weight: 500; font-size: 12.5px; color: var(--dim); }
+  #groups { position: absolute; left: 56px; right: 56px; top: 138px; height: 288px; display: flex; gap: 12px; }
+  .group { flex: 1; min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; }
+  .group h3 { margin: 0 0 10px; font-family: var(--title-font); font-weight: 700; font-size: 15px; letter-spacing: 3px; color: var(--c); text-shadow: 0 0 10px var(--c); text-align: center; }
+  .picks { display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 8px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
+  .pick { height: 32px; padding: 0 15px; border-radius: 16px; border: 1.5px solid var(--c); background: #ffffff0a; font-weight: 700; font-size: 13px; transition: background .15s, box-shadow .15s; }
+  .pick:hover { box-shadow: 0 0 10px var(--c); }
+  .pick.on { background: var(--c); color: #140a35; box-shadow: 0 0 14px var(--c); }
+  #cta { position: absolute; left: 56px; right: 56px; top: 438px; height: 50px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  #count { position: absolute; left: 0; width: 250px; font-weight: 700; font-size: 12.5px; color: var(--gold); }
+
+  .act { height: 42px; padding: 0 22px; border-radius: 9px; font-family: var(--title-font); font-weight: 700; font-size: 14px; letter-spacing: 1.5px; white-space: nowrap; background: #1b0a4d; }
+  .act.hot { border: 2px solid #ff7be2; background: linear-gradient(#ff2fd1, #c21fb8); box-shadow: 0 0 14px #ff4fd8cc, inset 0 0 10px #ffffff44; }
+  .act.cool { border: 2px solid #5f9bff; background: #101a5c; box-shadow: 0 0 12px #4f8cffaa, inset 0 0 8px #4f8cff55; }
+  .act:hover { filter: brightness(1.2); }
+
+  /* results: cards, details and the big photo */
+  #grid { position: absolute; left: 56px; top: 76px; width: 702px; height: 216px; display: grid; grid-template: 104px 104px / repeat(3, 228px); gap: 8px 9px; }
+  .card { position: relative; padding: 4px; display: flex; gap: 8px; text-align: left; border-radius: 10px; border: 1.5px solid #6b5aa8; background: var(--panel); box-shadow: 0 4px 12px #0007; overflow: hidden; transition: box-shadow .2s, border-color .2s; }
+  .card:hover { border-color: var(--neon-cyan); }
+  .card.on { border-color: #ff8bea; box-shadow: 0 0 0 1px #ff4fd8, 0 0 16px #ff4fd8cc, inset 0 0 14px #ff4fd833; }
+  .shot { flex: none; background: linear-gradient(#5a1a9a, #2b0f6b); overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; color: #fff; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
+  .thumb { width: 82px; height: 93px; border-radius: 7px; font-size: 40px; }
+  .info { flex: 1; min-width: 0; padding-top: 2px; }
+  .nm { font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat { display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 10.5px; margin: 3px 0 5px; white-space: nowrap; color: var(--dim); }
+  .stat i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; flex: none; }
+  .stat.s2 { color: #7dffc0; }
+  .stat.s2 i { animation: blink 1.2s infinite; }
+  .stat.s1 { color: #ff8bea; }
+  .stat.s0 { color: #a79cc9; }
+  .stat.s0 i { box-shadow: none; opacity: .6; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .chips { display: flex; flex-wrap: wrap; gap: 3px; }
+  .card .chips { max-height: 37px; overflow: hidden; }
+  .tag { height: 17px; line-height: 15px; padding: 0 6px; border-radius: 9px; border: 1px solid #b26bff99; background: #ffffff0a; font-weight: 700; font-size: 9.5px; white-space: nowrap; }
+  .tag.hit { border-color: var(--gold); background: var(--gold); color: #1d0f3f; }
+  .pct { position: absolute; left: 7px; bottom: 7px; padding: 1px 6px; border-radius: 8px; font-weight: 800; font-size: 9px; color: #1d0f3f; background: var(--gold); box-shadow: 0 0 8px #ffb300aa; }
+
+  #detail { position: absolute; left: 56px; top: 300px; width: 702px; height: 196px; padding: 12px 18px; display: flex; gap: 18px; }
+  #dleft { width: 344px; min-width: 0; }
+  #dname { font-family: var(--serif); font-weight: 700; font-size: 38px; line-height: 1; padding-bottom: 5px; border-bottom: 1px solid #d9b45b77; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #detail .stat { font-size: 12.5px; margin: 8px 0 7px; }
+  #detail .stat i { width: 10px; height: 10px; }
+  #dabout { margin: 0; font-weight: 500; font-size: 12.5px; line-height: 1.42; color: #efe8ff; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  #dright { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .rule { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-weight: 700; font-size: 17px; white-space: nowrap; }
+  .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: #d9b45b88; }
+  #dtags { flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 6px; margin-top: 9px; overflow: hidden; }
+  #dtags .tag { height: 23px; line-height: 21px; padding: 0 11px; font-size: 11.5px; border-radius: 12px; }
+  #actions { height: 42px; display: flex; gap: 10px; align-items: center; justify-content: center; }
+  #actions .act { flex: 1; padding: 0 6px; font-size: 13px; }
+  #actions .msg { font-weight: 700; font-size: 12.5px; line-height: 1.25; color: var(--gold); text-align: center; }
+  #actions.ask .act { flex: none; padding: 0 12px; }
+  #actions.ask .msg { flex: 1; text-align: left; }
+
+  #photo { position: absolute; left: 770px; top: 76px; width: 198px; height: 420px; border: 1.5px solid var(--trim); border-radius: 14px; overflow: hidden; background: #150c44; box-shadow: 0 0 0 1px #0007, 0 0 16px #b26bff66; }
+  #bigshot { position: absolute; inset: 0; font-size: 90px; }
+  #bigshot img { object-position: 50% 0; animation: fadein .35s; }
+  @keyframes fadein { from { opacity: 0; } }
+  .nav { position: absolute; top: 50%; width: 28px; height: 40px; margin-top: -20px; padding: 0; border: 1px solid #ffffff44; border-radius: 6px; background: #0b0a30b0; font-size: 18px; }
+  #prev { left: 6px; }
+  #next { right: 6px; }
+  #dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; gap: 7px; justify-content: center; }
+  #dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffffff66; }
+  #dots i.on { background: #fff; box-shadow: 0 0 6px #fff; }
+
+  /* Learn More covers the cards and details and leaves the big photo showing */
+  #more { position: absolute; left: 56px; top: 76px; width: 702px; height: 420px; padding: 16px 22px; display: none; flex-direction: column; z-index: 2; background: linear-gradient(160deg, #1b1149, #0b0a30); }
+  #more.show { display: flex; }
+  #mname { font-family: var(--serif); font-weight: 700; font-size: 40px; line-height: 1; }
+  #more .stat { font-size: 12.5px; margin: 8px 0 10px; }
+  #mtext { flex: 1; min-height: 0; overflow-y: auto; font-weight: 500; font-size: 14px; line-height: 1.5; color: #efe8ff; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
+  #mtext p { margin: 0 0 8px; }
+  .mrow { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+  .mrow b { flex: none; width: 76px; font-family: var(--title-font); font-weight: 700; font-size: 11px; letter-spacing: 1px; color: var(--gold); }
+  .mrow .chips { gap: 5px; }
+  .mrow .tag { height: 21px; line-height: 19px; padding: 0 9px; font-size: 11px; border-radius: 11px; }
+  #mbtns { display: flex; gap: 10px; margin-top: 12px; }
+  #mbtns .act { flex: 1; padding: 0 6px; font-size: 13px; }
+
+  #err { position: absolute; left: 90px; right: 90px; top: 220px; z-index: 8; text-align: center; font-weight: 700; font-size: 16px; color: #ffb3c4; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="frieze"></div>
+  <div class="column l" style="height:440px"></div>
+  <div class="column r" style="height:440px"></div>
+  <div id="plaque"><div id="title"></div><div id="tagline"></div></div>
+  <button class="pill" id="back">‹ Change My Picks</button>
+  <div id="found"></div>
+  <div id="pager"><button class="pill" id="pgup" aria-label="Previous page">‹</button><span id="pgtxt"></span><button class="pill" id="pgdn" aria-label="Next page">›</button></div>
+  <button class="pill" id="close" aria-label="Close">×</button>
+
+  <section id="ask">
+    <h2>What are you in the mood for?</h2>
+    <p>Pick anything that catches your eye and we'll find who fits.</p>
+    <div id="groups"></div>
+    <div id="cta"><div id="count"></div><button class="act hot" id="go">Find My Match</button><button class="act cool" id="all">Browse Everyone</button></div>
+  </section>
+
+  <section id="list">
+    <div id="grid"></div>
+    <div class="glass" id="detail">
+      <div id="dleft"><div id="dname"></div><div class="stat" id="dstat"></div><p id="dabout"></p></div>
+      <div id="dright"><div class="rule">Specialties / Kinks</div><div id="dtags"></div><div id="actions"></div></div>
+    </div>
+    <div class="glass" id="more">
+      <div id="mname"></div><div class="stat" id="mstat"></div>
+      <div id="mtext"></div>
+      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act hot" id="mbook">Request Booking</button></div>
+    </div>
+    <div id="photo">
+      <div class="shot" id="bigshot"></div>
+      <button class="nav" id="prev" aria-label="Previous photo">‹</button><button class="nav" id="next" aria-label="Next photo">›</button>
+      <div id="dots"></div>
+    </div>
+  </section>
+  <div id="err"></div>
+</div>
+<script src="club.js"></script>
+<script>
+const STATUS = ['Away', 'In the Club', 'Performing Now'];
+const GROUPS = [['kinks', 'Kinks', 'var(--neon-pink)'], ['interests', 'Interests', 'var(--neon-violet)'], ['vibes', 'Vibes', 'var(--neon-cyan)']];
+const PER_PAGE = 6;
+const DEMO_STATUS = [2, 1, 1, 0, 1, 0];
+
+const stage = $('stage');
+let people = [], picks = new Set(), found = [], page = 0, sel = null, shot = 0;
+let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0;
+
+fit(stage);
+scenery(stage, [772, 26]);
+
+// performers.txt: settings first, then one block per performer, each starting with NAME
+function readRoster(text) {
+  const info = {};
+  text.split(/\r?\n/).forEach(raw => {
+    const line = raw.trim(), c = line.indexOf(':');
+    if (!line || line[0] === '#' || c < 0) return;
+    const k = line.slice(0, c).trim().toUpperCase(), v = line.slice(c + 1).trim();
+    const words = () => v.split(',').map(w => w.trim()).filter(Boolean);
+    const p = people[people.length - 1];
+    if (k === 'NAME') people.push({ i: people.length, name: v, status: 0, photo: '', full: [], kinks: [], interests: [], vibes: [], about: '', more: '', tags: [] });
+    else if (!p) info[k] = v;
+    else if (k === 'PHOTO') p.photo = v;
+    else if (k === 'FULL') p.full = words();
+    else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = words();
+    else if (k === 'ABOUT') p.about = v;
+    else if (k === 'MORE') p.more = v;
+  });
+  people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
+  $('title').textContent = info.TITLE || 'Discover Performers';
+  document.title = info.TITLE || 'Discover Performers';
+  $('tagline').textContent = info.TAGLINE || '';
+}
+
+const picture = (src, name) => src ? `<img src="${esc(src)}" alt="" onerror="this.parentNode.textContent='${esc(name[0] || '')}'">` : esc(name[0] || '');
+const statusRow = p => `<i></i>${STATUS[p.status]}`;
+
+function show(id) {
+  ['ask', 'list'].forEach(s => $(s).classList.toggle('show', s === id));
+  $('back').style.display = $('found').style.display = id === 'list' ? '' : 'none';
+  if (id === 'ask') $('pager').style.display = 'none';
+}
+
+function drawAsk() {
+  $('groups').innerHTML = GROUPS.map(([key, label, color]) => {
+    // most common words first
+    const n = {};
+    people.forEach(p => p[key].forEach(w => n[w] = (n[w] || 0) + 1));
+    const words = Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b));
+    return `<div class="glass group" style="--c:${color}"><h3>${label}</h3><div class="picks">`
+      + words.map(w => `<button class="pick${picks.has(w) ? ' on' : ''}" data-w="${esc(w)}">${esc(w)}</button>`).join('') + `</div></div>`;
+  }).join('');
+  drawCount();
+}
+
+function drawCount() {
+  const n = search().length, live = people.filter(p => p.status === 2).length;
+  $('count').textContent = (picks.size ? `${n} match${n === 1 ? '' : 'es'}` : `${people.length} performers`) + (live ? ` · ${live} on stage now` : '');
+  $('go').disabled = !picks.size;
+  $('go').style.opacity = picks.size ? 1 : .45;
+}
+
+// Best match first, and among equals whoever is around right now
+function search() {
+  const want = [...picks];
+  return people.map(p => ({ p, hits: want.filter(w => p.tags.includes(w)) }))
+    .filter(r => !want.length || r.hits.length)
+    .sort((a, b) => b.hits.length - a.hits.length || b.p.status - a.p.status || a.p.i - b.p.i);
+}
+
+function openList() {
+  found = search();
+  page = 0;
+  show('list');
+  $('found').textContent = `${found.length} found`;
+  choose(found[0] && found[0].p);
+  drawCards();
+}
+
+function drawCards() {
+  const pages = Math.max(1, Math.ceil(found.length / PER_PAGE));
+  $('pager').style.display = pages > 1 ? 'flex' : 'none';
+  $('pgtxt').textContent = `${page + 1} / ${pages}`;
+  $('pgup').disabled = page === 0;
+  $('pgdn').disabled = page >= pages - 1;
+  $('grid').innerHTML = found.slice(page * PER_PAGE, (page + 1) * PER_PAGE).map(({ p, hits }) => {
+    // show what matched first
+    const tags = [...hits, ...p.tags.filter(t => !hits.includes(t))].slice(0, 4);
+    const perfect = picks.size && hits.length === picks.size;
+    return `<button class="card${p === sel ? ' on' : ''}" data-i="${p.i}">
+      <div class="shot thumb">${picture(p.photo, p.name)}</div>
+      <div class="info"><div class="nm">${esc(p.name)}</div><div class="stat s${p.status}">${statusRow(p)}</div>
+      <div class="chips">${tags.map(t => `<span class="tag${hits.includes(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>
+      ${picks.size ? `<span class="pct">${perfect ? 'Perfect' : `${hits.length} of ${picks.size}`}</span>` : ''}</button>`;
+  }).join('');
+}
+
+function choose(p) {
+  sel = p;
+  shot = 0;
+  closeMore();
+  bookState('idle');
+  drawDetail();
+  drawPhoto();
+  drawCards();
+}
+
+function drawDetail() {
+  if (!sel) return;
+  $('dname').textContent = sel.name;
+  $('dstat').className = $('mstat').className = `stat s${sel.status}`;
+  $('dstat').innerHTML = $('mstat').innerHTML = statusRow(sel);
+  $('dabout').textContent = sel.about;
+  $('dtags').innerHTML = sel.tags.slice(0, 8).map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('');
+}
+
+function drawPhoto() {
+  if (!sel) return;
+  const n = sel.full.length;
+  $('bigshot').innerHTML = picture(sel.full[shot], sel.name);
+  $('prev').style.display = $('next').style.display = n > 1 ? '' : 'none';
+  $('dots').innerHTML = n > 1 ? sel.full.map((f, i) => `<i class="${i === shot ? 'on' : ''}"></i>`).join('') : '';
+}
+
+function openMore() {
+  $('mname').textContent = sel.name;
+  const row = (label, tags) => tags.length ? `<div class="mrow"><b>${label}</b><div class="chips">${tags.map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>` : '';
+  $('mtext').innerHTML = `<p>${esc(sel.about)}</p>${sel.more ? `<p>${esc(sel.more)}</p>` : ''}`
+    + row('Kinks', sel.kinks) + row('Interests', sel.interests) + row('Vibes', sel.vibes);
+  $('more').classList.add('show');
+}
+function closeMore() { $('more').classList.remove('show'); }
+
+// The screen tells the HUD script by loading its web address; the script answers in the "#" (ack)
+function tellHud(action, i) {
+  const id = ++clicks;
+  if (demo) setTimeout(() => answered(id, 0), 800);
+  else if (hud) new Image().src = `${hud}?a=${action}&i=${i}&s=${id}`;
+  return id;
+}
+
+function bookState(state) {
+  const a = $('actions'), name = sel ? esc(sel.name.split(' ')[0]) : '';
+  clearTimeout(bookTimer);
+  a.className = state === 'confirm' ? 'ask' : '';
+  const say = text => `<div class="msg">${text}</div>`;
+  a.innerHTML = {
+    idle: `<button class="act hot" data-do="more">Learn More ›</button><button class="act cool" data-do="book">Request Booking</button>`,
+    confirm: `${say(`Send ${name} your name and a booking request?`)}<button class="act hot" data-do="send">Send</button><button class="act cool" data-do="idle">Cancel</button>`,
+    sending: say('Sending your request…'),
+    sent: say(`Request sent! Watch for a message from ${name}.`),
+    wait: say('Please wait a minute before sending another request.'),
+    nokey: say(`${name} can't take requests through the HUD yet.`),
+    fail: say("Couldn't reach your HUD. Please try again in a moment.")
+  }[state];
+  if (state !== 'idle' && state !== 'confirm' && state !== 'sending') bookTimer = setTimeout(() => bookState('idle'), 7000);
+}
+
+function answered(id, code) {
+  if (id !== waiting) return;
+  waiting = null;
+  bookState(['sent', 'wait', 'nokey'][code] || 'fail');
+}
+
+function sendBooking() {
+  bookState('sending');
+  closeMore();
+  const id = waiting = tellHud('book', sel.i);
+  setTimeout(() => { if (waiting === id) { waiting = null; bookState('fail'); } }, 9000);
+}
+
+$('groups').addEventListener('click', e => {
+  const b = e.target.closest('.pick');
+  if (!b) return;
+  const w = b.dataset.w;
+  picks.has(w) ? picks.delete(w) : picks.add(w);
+  b.classList.toggle('on', picks.has(w));
+  drawCount();
+});
+$('go').addEventListener('click', () => { if (picks.size) openList(); });
+$('all').addEventListener('click', () => { picks.clear(); drawAsk(); openList(); });
+$('back').addEventListener('click', () => { closeMore(); drawAsk(); show('ask'); });
+$('close').addEventListener('click', () => { if (!demo) tellHud('close', 0); });
+$('grid').addEventListener('click', e => {
+  const c = e.target.closest('.card');
+  if (c) choose(people[+c.dataset.i]);
+});
+$('pgup').addEventListener('click', () => { page--; drawCards(); });
+$('pgdn').addEventListener('click', () => { page++; drawCards(); });
+$('prev').addEventListener('click', () => { shot = (shot + sel.full.length - 1) % sel.full.length; drawPhoto(); });
+$('next').addEventListener('click', () => { shot = (shot + 1) % sel.full.length; drawPhoto(); });
+$('actions').addEventListener('click', e => {
+  const d = e.target.dataset.do;
+  if (d === 'more') openMore();
+  else if (d === 'book') bookState('confirm');
+  else if (d === 'send') sendBooking();
+  else if (d === 'idle') bookState('idle');
+});
+$('mback').addEventListener('click', closeMore);
+$('mbook').addEventListener('click', () => { closeMore(); bookState('confirm'); });
+$('mprofile').addEventListener('click', () => { tellHud('profile', sel.i); $('mprofile').textContent = 'Sent To Chat ✓'; setTimeout(() => $('mprofile').textContent = 'Profile Link In Chat', 3000); });
+
+// Live status and answers from the HUD script
+function apply() {
+  const h = readHash();
+  demo = !h.u;
+  if (h.u) hud = dec(h.u);
+  people.forEach((p, i) => p.status = demo ? (DEMO_STATUS[i] || 0) : +(h.st || '')[i] || 0);
+  if ($('ask').classList.contains('show')) drawCount();
+  else { drawDetail(); drawCards(); }
+  if (h.ack) { const [id, code] = h.ack.split('.'); answered(+id, +code); }
+}
+addEventListener('hashchange', apply);
+
+show('ask');
+fetch('performers.txt?v=' + Date.now())
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+  .then(text => {
+    readRoster(text);
+    if (!people.length) throw new Error('empty');
+    apply();
+    drawAsk();
+  })
+  .catch(e => { $('err').textContent = `Couldn't load the performer list (${e.message}).`; });
+</script>
+</body>
+</html>
