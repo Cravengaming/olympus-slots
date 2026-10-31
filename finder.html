@@ -203,7 +203,7 @@ const DEMO_STATUS = [2, 1, 1, 0, 1, 0];
 
 const stage = $('stage');
 let people = [], choices = {}, picks = new Set(), found = [], page = 0, sel = null, shot = 0;
-let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0, rateCard = null;
+let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0, rateCard = null, club = 'club';
 
 fit(stage);
 scenery(stage, [772, 26]);
@@ -220,6 +220,7 @@ function readRoster(text) {
     const p = people[people.length - 1];
     if (k === 'NAME') people.push({ i: people.length, name: v, status: 0, photo: '', full: [], kinks: [], interests: [], vibes: [], about: '', more: '', tags: [] });
     else if (!p) info[k] = v;
+    else if (k === 'KEY') p.key = v;
     else if (k === 'PHOTO') p.photo = v;
     else if (k === 'FULL') p.full = list(v);
     else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = list(v);
@@ -231,6 +232,7 @@ function readRoster(text) {
   });
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
   GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
+  club = info.CLUB || 'club';
   $('title').textContent = info.TITLE || 'Discover Performers';
   document.title = info.TITLE || 'Discover Performers';
   $('tagline').textContent = info.TAGLINE || '';
@@ -383,11 +385,23 @@ function openRates() {
 }
 
 // The screen tells the HUD script by loading its web address; the script answers in the "#" (ack)
-function tellHud(action, i) {
+function tellHud(action, i, value) {
   const id = ++clicks;
   if (demo) setTimeout(() => answered(id, 0), 800);
-  else if (hud) new Image().src = `${hud}?a=${action}&i=${i}&s=${id}`;
+  else if (hud) new Image().src = `${hud}?a=${action}&i=${i}&s=${id}` + (value ? `&v=${encodeURIComponent(value)}` : '');
   return id;
+}
+
+// The HUD script can't hold performers.txt, so it's told who's who, one at a time and in order
+function tellRoster() {
+  let i = 0;
+  const next = () => {
+    if (i >= people.length || !hud) return;
+    const p = people[i++], img = new Image();
+    img.onload = img.onerror = next;
+    img.src = `${hud}?a=who&i=${p.i}&k=${p.key || 'none'}&n=${encodeURIComponent(p.name)}&c=${encodeURIComponent(club)}`;
+  };
+  next();
 }
 
 function bookState(state) {
@@ -456,13 +470,13 @@ $('rtabs').addEventListener('click', e => {
   if (t) drawRates(rateCard, +t.dataset.t);
 });
 // These answer in the patron's chat, so the button only says where to look
-function chatButton(id, action) {
+function chatButton(id, action, value) {
   const b = $(id), label = b.textContent;
-  b.addEventListener('click', () => { tellHud(action, sel.i); b.textContent = 'Check Your Chat ✓'; setTimeout(() => b.textContent = label, 3000); });
+  b.addEventListener('click', () => { tellHud(action, sel.i, value && value()); b.textContent = 'Check Your Chat ✓'; setTimeout(() => b.textContent = label, 3000); });
 }
 chatButton('mprofile', 'profile');
-chatButton('rsite', 'site');
-chatButton('rnote', 'note');
+chatButton('rsite', 'site', () => sel.site);
+chatButton('rnote', 'note', () => sel.card);
 
 // Live status and answers from the HUD script
 function apply() {
@@ -484,6 +498,7 @@ fetch('performers.txt?v=' + Date.now())
     if (!people.length) throw new Error('empty');
     apply();
     drawAsk();
+    if (!demo) tellRoster();
   })
   .catch(e => { $('err').textContent = `Couldn't load the performer list (${e.message}).`; });
 </script>
