@@ -321,7 +321,7 @@ function bookState(state) {
   a.className = state === 'confirm' ? 'ask' : '';
   const say = text => `<div class="msg">${text}</div>`;
   a.innerHTML = {
-    idle: `<button class="act hot" data-do="more">Learn More ›</button><button class="act cool" data-do="book">Request Booking</button>`,
+    idle: `<button class="act hot" data-do="more">Learn More ›</button>`,
     confirm: `${say(`Send ${name} your name and a booking request?`)}<button class="act hot" data-do="send">Send</button><button class="act cool" data-do="idle">Cancel</button>`,
     sending: say('Sending your request…'),
     sent: say(`Request sent! Watch for a message from ${name}.`),
@@ -368,7 +368,6 @@ $('next').addEventListener('click', () => { shot = (shot + 1) % sel.full.length;
 $('actions').addEventListener('click', e => {
   const d = e.target.dataset.do;
   if (d === 'more') openMore();
-  else if (d === 'book') bookState('confirm');
   else if (d === 'send') sendBooking();
   else if (d === 'idle') bookState('idle');
 });
