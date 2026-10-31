@@ -9,9 +9,11 @@
 # - PHOTO is the small picture on the card. FULL is one or more big pictures, separated by commas.
 #   Use a file in the performers folder, or a full web address starting with https://
 # - ABOUT is the short description. MORE is the longer one behind Learn More. Keep each on one line.
-# - RATES is what the Rates In Chat button behind Learn More sends privately to the patron.
-#   It can be a website address, a picture in the performers folder, or plain words on one line.
-#   Use more than one RATES line to send more than one thing. With no RATES, the button is hidden.
+# - RATES is the performer's rate card file in the performers folder, shown by View Rates behind
+#   Learn More. See performers/nyx-rates.txt for how to lay one out.
+# - WEBSITE is a full web address. The patron gets it as a link in their chat.
+# - NOTECARD is the exact name of a notecard inside the Notecard Giver at the club.
+#   Each of these three is optional. With none of them, the View Rates button is hidden.
 # - KEY is the performer's avatar key. It's needed for Request Booking and the live status.
 #   Without it, the profile still shows but the person shows as offline.
 
@@ -30,8 +32,9 @@ FULL: performers/nyx-full.jpg, performers/nyx.jpg
 KINKS: Domme, Roleplay
 INTERESTS: Cabaret, VIP Shows, Gothic / Alternative
 VIBES: Tease, Elegant, Mysterious
-RATES: Sample rates: L$500 for 30 minutes, L$900 for an hour.
-RATES: performers/nyx-full.jpg
+RATES: performers/nyx-rates.txt
+WEBSITE: https://cravengaming.github.io/olympus-slots/finder.html
+NOTECARD: Nyx Rate Card
 ABOUT: A seductive blend of darkness and elegance. Nyx brings high-energy performances, immersive roleplay, and a touch of the divine to every show.
 MORE: Sample text. Replace this with the longer story: what a booking with this performer is like, favorite scenes, what they love to do on stage, and anything a patron should know first.
 

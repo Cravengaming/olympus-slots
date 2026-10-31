@@ -6,7 +6,7 @@
 <title>Discover Performers</title>
 <!-- Performer finder screen. Everything about the performers comes from performers.txt.
      The finder HUD script drives it through the address after "#":
-     u=the HUD's web address (Close, Request Booking, Profile and Rates clicks are sent there),
+     u=the HUD's web address (Close, Request Booking, Profile, Website and Notecard clicks are sent there),
      st=one digit per performer in file order (2 performing now, 1 in the club, 0 away),
      ack=<click number>.<result> (0 done, 1 too soon, 2 no avatar key for that performer).
      With no "#", it runs as a demo. Look comes from theme.css and club.js. -->
@@ -128,6 +128,27 @@
   #mbtns { display: flex; gap: 10px; margin-top: 12px; }
   #mbtns .act { flex: 1; padding: 0 6px; font-size: 13px; }
 
+  /* the rate card covers everything below the title, big photo included */
+  #rates { position: absolute; left: 56px; top: 76px; width: 912px; height: 420px; padding: 10px 16px 12px; display: none; flex-direction: column; z-index: 2; background: linear-gradient(160deg, #1b1149, #0b0a30); }
+  #rates.show { display: flex; }
+  #rname { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1; white-space: nowrap; }
+  #rintro { margin-top: 3px; font-weight: 500; font-size: 11.5px; line-height: 1.3; color: var(--dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #rtabs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  #rtabs:empty { display: none; }
+  .rtab { height: 25px; padding: 0 12px; border-radius: 13px; border: 1px solid #d9b45b99; background: #0d0b38e6; font-weight: 700; font-size: 11.5px; }
+  .rtab.on { border-color: var(--gold); background: var(--gold); color: #1d0f3f; }
+  #rbody { flex: 1; min-height: 0; margin-top: 8px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
+  #rcols { column-count: 3; column-gap: 10px; }
+  .rbox { break-inside: avoid; margin-bottom: 8px; padding: 6px 9px 7px; border: 1px solid #6b5aa8; border-radius: 8px; background: #ffffff0a; }
+  .rbox h4 { margin: 0 0 3px; font-family: var(--serif); font-weight: 700; font-size: 15px; line-height: 1.1; color: #ff8bea; }
+  .rrow { display: flex; align-items: baseline; gap: 5px; font-weight: 600; font-size: 11.5px; line-height: 16px; }
+  .rrow i { flex: 1; min-width: 8px; border-bottom: 1px dotted #ffffff44; }
+  .rrow b { font-weight: 800; color: var(--gold); white-space: nowrap; }
+  .rnote { margin: 1px 0 2px; font-weight: 500; font-size: 10.5px; line-height: 1.3; color: var(--dim); }
+  #rmsg { padding-top: 60px; text-align: center; font-weight: 700; font-size: 14px; color: var(--dim); }
+  #rbtns { display: flex; gap: 10px; margin-top: 8px; }
+  #rbtns .act { flex: 1; padding: 0 6px; font-size: 13px; }
+
   #err { position: absolute; left: 90px; right: 90px; top: 220px; z-index: 8; text-align: center; font-weight: 700; font-size: 16px; color: #ffb3c4; }
 </style>
 </head>
@@ -157,7 +178,13 @@
     <div class="glass" id="more">
       <div id="mname"></div><div class="stat" id="mstat"></div>
       <div id="mtext"></div>
-      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act cool" id="mrates">Rates In Chat</button><button class="act hot" id="mbook">Request Booking</button></div>
+      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act cool" id="mrates">View Rates ›</button><button class="act hot" id="mbook">Request Booking</button></div>
+    </div>
+    <div class="glass" id="rates">
+      <div id="rname"></div><div id="rintro"></div>
+      <div id="rtabs"></div>
+      <div id="rbody"></div>
+      <div id="rbtns"><button class="act cool" id="rback">‹ Back</button><button class="act cool" id="rsite">Website Link In Chat</button><button class="act cool" id="rnote">Send Me The Notecard</button><button class="act hot" id="rbook">Request Booking</button></div>
     </div>
     <div id="photo">
       <div class="shot" id="bigshot"></div>
@@ -176,7 +203,7 @@ const DEMO_STATUS = [2, 1, 1, 0, 1, 0];
 
 const stage = $('stage');
 let people = [], choices = {}, picks = new Set(), found = [], page = 0, sel = null, shot = 0;
-let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0;
+let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0, rateCard = null;
 
 fit(stage);
 scenery(stage, [772, 26]);
@@ -198,7 +225,9 @@ function readRoster(text) {
     else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = list(v);
     else if (k === 'ABOUT') p.about = v;
     else if (k === 'MORE') p.more = v;
-    else if (k === 'RATES') p.rates = p.rates || !!v;
+    else if (k === 'RATES') p.rates = v;
+    else if (k === 'WEBSITE') p.site = v;
+    else if (k === 'NOTECARD') p.card = v;
   });
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
   GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
@@ -304,10 +333,54 @@ function openMore() {
   const row = (label, tags) => tags.length ? `<div class="mrow"><b>${label}</b><div class="chips">${tags.map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>` : '';
   $('mtext').innerHTML = `<p>${esc(sel.about)}</p>${sel.more ? `<p>${esc(sel.more)}</p>` : ''}`
     + row('Kinks', sel.kinks) + row('Interests', sel.interests) + row('Vibes', sel.vibes);
-  $('mrates').style.display = sel.rates ? '' : 'none';
+  $('mrates').style.display = sel.rates || sel.site || sel.card ? '' : 'none';
   $('more').classList.add('show');
 }
-function closeMore() { $('more').classList.remove('show'); }
+function closeRates() { $('rates').classList.remove('show'); }
+function closeMore() { $('more').classList.remove('show'); closeRates(); }
+
+// A performer's rate card file: INTRO, then TAB and CARD headings. "label = price" makes a price row, any other line a note
+function readRates(text) {
+  const card = { intro: '', tabs: [] };
+  let tab = null, box = null;
+  text.split(/\r?\n/).forEach(raw => {
+    const line = raw.trim(), head = line.match(/^(INTRO|TAB|CARD):\s*(.*)$/i);
+    if (!line || line[0] === '#') return;
+    const kind = head ? head[1].toUpperCase() : '';
+    if (kind === 'INTRO') { card.intro = head[2]; return; }
+    if (kind === 'TAB') { tab = { name: head[2], boxes: [] }; box = null; card.tabs.push(tab); return; }
+    if (!tab) { tab = { name: 'Rates', boxes: [] }; card.tabs.push(tab); }
+    if (kind === 'CARD' || !box) { box = { title: kind === 'CARD' ? head[2] : '', rows: [] }; tab.boxes.push(box); }
+    if (kind === 'CARD') return;
+    const eq = line.indexOf('=');
+    box.rows.push(eq < 0 ? { note: line } : { label: line.slice(0, eq).trim(), price: line.slice(eq + 1).trim() });
+  });
+  return card;
+}
+
+function drawRates(card, on) {
+  $('rintro').textContent = card.intro;
+  $('rtabs').innerHTML = card.tabs.length > 1 ? card.tabs.map((t, i) => `<button class="rtab${i === on ? ' on' : ''}" data-t="${i}">${esc(t.name)}</button>`).join('') : '';
+  const tab = card.tabs[on];
+  $('rbody').scrollTop = 0;
+  $('rbody').innerHTML = tab ? `<div id="rcols">${tab.boxes.map(b => `<div class="rbox">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}${b.rows.map(r => r.note
+    ? `<div class="rnote">${esc(r.note)}</div>`
+    : `<div class="rrow"><span>${esc(r.label)}</span><i></i><b>${esc(r.price)}</b></div>`).join('')}</div>`).join('')}</div>` : '';
+}
+
+function openRates() {
+  const who = sel, msg = text => { $('rintro').textContent = ''; $('rtabs').innerHTML = ''; $('rbody').innerHTML = `<div id="rmsg">${esc(text)}</div>`; };
+  $('rname').textContent = `${who.name}'s Rates`;
+  $('rsite').style.display = who.site ? '' : 'none';
+  $('rnote').style.display = who.card ? '' : 'none';
+  $('rates').classList.add('show');
+  if (!who.rates) return msg('Use the buttons below to find out more.');
+  msg('Loading…');
+  fetch(`${who.rates}?v=${Date.now()}`)
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+    .then(text => { if (sel === who) { rateCard = readRates(text); drawRates(rateCard, 0); } })
+    .catch(() => { if (sel === who) msg("This rate card couldn't be loaded. Please try again in a moment."); });
+}
 
 // The screen tells the HUD script by loading its web address; the script answers in the "#" (ack)
 function tellHud(action, i) {
@@ -375,8 +448,21 @@ $('actions').addEventListener('click', e => {
 });
 $('mback').addEventListener('click', closeMore);
 $('mbook').addEventListener('click', () => { closeMore(); bookState('confirm'); });
-$('mprofile').addEventListener('click', () => { tellHud('profile', sel.i); $('mprofile').textContent = 'Sent To Chat ✓'; setTimeout(() => $('mprofile').textContent = 'Profile Link In Chat', 3000); });
-$('mrates').addEventListener('click', () => { tellHud('rates', sel.i); $('mrates').textContent = 'Sent To Chat ✓'; setTimeout(() => $('mrates').textContent = 'Rates In Chat', 3000); });
+$('mrates').addEventListener('click', openRates);
+$('rback').addEventListener('click', closeRates);
+$('rbook').addEventListener('click', () => { closeMore(); bookState('confirm'); });
+$('rtabs').addEventListener('click', e => {
+  const t = e.target.closest('.rtab');
+  if (t) drawRates(rateCard, +t.dataset.t);
+});
+// These answer in the patron's chat, so the button only says where to look
+function chatButton(id, action) {
+  const b = $(id), label = b.textContent;
+  b.addEventListener('click', () => { tellHud(action, sel.i); b.textContent = 'Check Your Chat ✓'; setTimeout(() => b.textContent = label, 3000); });
+}
+chatButton('mprofile', 'profile');
+chatButton('rsite', 'site');
+chatButton('rnote', 'note');
 
 // Live status and answers from the HUD script
 function apply() {
