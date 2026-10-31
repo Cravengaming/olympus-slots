@@ -46,13 +46,12 @@
   section.show { display: block; }
 
   /* first screen: what are you in the mood for? */
-  #ask h2 { position: absolute; left: 56px; right: 56px; top: 76px; margin: 0; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 29px; color: #fff; text-shadow: 0 0 12px #ff4fd8aa; }
-  #ask p { position: absolute; left: 56px; right: 56px; top: 113px; margin: 0; text-align: center; font-weight: 500; font-size: 12.5px; color: var(--dim); }
-  #groups { position: absolute; left: 56px; right: 56px; top: 138px; height: 288px; display: flex; gap: 12px; }
-  .group { flex: 1; min-width: 0; padding: 12px 14px; display: flex; flex-direction: column; }
-  .group h3 { margin: 0 0 10px; font-family: var(--title-font); font-weight: 700; font-size: 15px; letter-spacing: 3px; color: var(--c); text-shadow: 0 0 10px var(--c); text-align: center; }
-  .picks { display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 8px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
-  .pick { height: 32px; padding: 0 15px; border-radius: 16px; border: 1.5px solid var(--c); background: #ffffff0a; font-weight: 700; font-size: 13px; transition: background .15s, box-shadow .15s; }
+  #ask h2 { position: absolute; left: 56px; right: 56px; top: 72px; margin: 0; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 22px; color: #fff; text-shadow: 0 0 12px #ff4fd8aa; }
+  #groups { position: absolute; left: 56px; right: 56px; top: 102px; height: 328px; display: flex; gap: 12px; }
+  .group { flex: 1; min-width: 170px; padding: 9px 9px; display: flex; flex-direction: column; }
+  .group h3 { margin: 0 0 6px; font-family: var(--title-font); font-weight: 700; font-size: 15px; letter-spacing: 3px; color: var(--c); text-shadow: 0 0 10px var(--c); text-align: center; }
+  .picks { display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
+  .pick { height: 21px; padding: 0 7px; border-radius: 11px; border: 1px solid var(--c); background: #ffffff0a; font-weight: 700; font-size: 10px; white-space: nowrap; transition: background .15s, box-shadow .15s; }
   .pick:hover { box-shadow: 0 0 10px var(--c); }
   .pick.on { background: var(--c); color: #140a35; box-shadow: 0 0 14px var(--c); }
   #cta { position: absolute; left: 56px; right: 56px; top: 438px; height: 50px; display: flex; align-items: center; justify-content: center; gap: 12px; }
@@ -145,7 +144,6 @@
 
   <section id="ask">
     <h2>What are you in the mood for?</h2>
-    <p>Pick anything that catches your eye and we'll find who fits.</p>
     <div id="groups"></div>
     <div id="cta"><div id="count"></div><button class="act hot" id="go">Find My Match</button><button class="act cool" id="all">Browse Everyone</button></div>
   </section>
@@ -177,30 +175,32 @@ const PER_PAGE = 6;
 const DEMO_STATUS = [2, 1, 1, 0, 1, 0];
 
 const stage = $('stage');
-let people = [], picks = new Set(), found = [], page = 0, sel = null, shot = 0;
+let people = [], choices = {}, picks = new Set(), found = [], page = 0, sel = null, shot = 0;
 let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0;
 
 fit(stage);
 scenery(stage, [772, 26]);
 
-// performers.txt: settings first, then one block per performer, each starting with NAME
+const list = v => (v || '').split(',').map(w => w.trim()).filter(Boolean);
+
+// performers.txt: settings and the button lists first, then one block per performer, each starting with NAME
 function readRoster(text) {
   const info = {};
   text.split(/\r?\n/).forEach(raw => {
     const line = raw.trim(), c = line.indexOf(':');
     if (!line || line[0] === '#' || c < 0) return;
     const k = line.slice(0, c).trim().toUpperCase(), v = line.slice(c + 1).trim();
-    const words = () => v.split(',').map(w => w.trim()).filter(Boolean);
     const p = people[people.length - 1];
     if (k === 'NAME') people.push({ i: people.length, name: v, status: 0, photo: '', full: [], kinks: [], interests: [], vibes: [], about: '', more: '', tags: [] });
     else if (!p) info[k] = v;
     else if (k === 'PHOTO') p.photo = v;
-    else if (k === 'FULL') p.full = words();
-    else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = words();
+    else if (k === 'FULL') p.full = list(v);
+    else if (k === 'KINKS' || k === 'INTERESTS' || k === 'VIBES') p[k.toLowerCase()] = list(v);
     else if (k === 'ABOUT') p.about = v;
     else if (k === 'MORE') p.more = v;
   });
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
+  GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
   $('title').textContent = info.TITLE || 'Discover Performers';
   document.title = info.TITLE || 'Discover Performers';
   $('tagline').textContent = info.TAGLINE || '';
@@ -217,11 +217,12 @@ function show(id) {
 
 function drawAsk() {
   $('groups').innerHTML = GROUPS.map(([key, label, color]) => {
-    // most common words first
+    // most common words first, then the rest A to Z, and longer lists get wider panels
     const n = {};
+    choices[key].forEach(w => n[w] = 0);
     people.forEach(p => p[key].forEach(w => n[w] = (n[w] || 0) + 1));
     const words = Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b));
-    return `<div class="glass group" style="--c:${color}"><h3>${label}</h3><div class="picks">`
+    return `<div class="glass group" style="--c:${color};flex-grow:${words.join('').length + 3 * words.length}"><h3>${label}</h3><div class="picks">`
       + words.map(w => `<button class="pick${picks.has(w) ? ' on' : ''}" data-w="${esc(w)}">${esc(w)}</button>`).join('') + `</div></div>`;
   }).join('');
   drawCount();
@@ -230,8 +231,9 @@ function drawAsk() {
 function drawCount() {
   const n = search().length, live = people.filter(p => p.status === 2).length;
   $('count').textContent = (picks.size ? `${n} match${n === 1 ? '' : 'es'}` : `${people.length} performers`) + (live ? ` · ${live} on stage now` : '');
-  $('go').disabled = !picks.size;
-  $('go').style.opacity = picks.size ? 1 : .45;
+  const ready = picks.size && n;
+  $('go').disabled = !ready;
+  $('go').style.opacity = ready ? 1 : .45;
 }
 
 // Best match first, and among equals whoever is around right now

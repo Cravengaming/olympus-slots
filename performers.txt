@@ -2,9 +2,10 @@
 #
 # - Lines starting with # are notes and are ignored.
 # - Each performer starts with a NAME line and keeps going until the next NAME.
-# - KINKS, INTERESTS and VIBES are lists separated by commas. The choices on the
-#   finder's first screen are built from these, so a new word here becomes a new button.
-#   Spell a word the same way each time so people match on it.
+# - KINKS, INTERESTS and VIBES are lists separated by commas. The three lists above the first
+#   performer are the buttons on the finder's first screen. Add a word there to add a button.
+#   A word given only to a performer becomes a button too.
+#   Spell a word exactly the same way each time, capitals included, so people match on it.
 # - PHOTO is the small picture on the card. FULL is one or more big pictures, separated by commas.
 #   Use a file in the performers folder, or a full web address starting with https://
 # - ABOUT is the short description. MORE is the longer one behind Learn More. Keep each on one line.
@@ -15,23 +16,27 @@ CLUB: Olympus
 TITLE: Discover Performers
 TAGLINE: Talent · Fantasy · Connection
 
+KINKS: Submissive, Bimbo, Homewrecker, Switch, Findom, Babygirl, Petplay, Cum Slut, Anal, Hotwife, Voyeur / Exhibition, Pain Slut, Power Bottom, Breeding, Puppy, Kitten, Bunny, JOI, Mommy, Good Girl, Waifu, Vanilla / Soft Play, BDSM, Feet / Footwear, Praise / Worship, Hypnosis / Mind Games, Size Fantasy, Tribute, Cuck, Group Play, Unicorn, Public, Leather / Latex, Humiliation Play, Throat Goat, Size Queen, Domme, Roleplay, Slow Burn
+INTERESTS: Stoner, Party, Cooking / Foodie, Fitness, Gothic / Alternative, Sci-Fi / Cyberpunk, Gamer / Nerdy, Photography / Modeling, Sports, Text, Voice, Anime, Shopping, Music, Deep Talks, Art, Reading, Movies, Outdoors, Travel / Adventure, Dancing, Cabaret, VIP Shows, Cosplay
+VIBES: GFE, Intellectual, Conversationalist, Attitude, Nympho, Insatiable, Seductress, Feral, Forbidden Fruit, Femme Fatale, Sassy, Spoiled Brat, Shy, Outgoing, Girl Next Door, Curvy / Thicc, Gentle, Tease, Filthy Mouth, Confident, Commanding, Mysterious, Elegant, Glamorous, Bubbly, Adventurous, Nurturing, Intense, Best Friend, Petite, Gooner, Goddess, MILF, E-Girl, Princess, Romantic, Bold, Dreamy, Playful, Sweet, Fiery
+
 NAME: Nyx Vespera
 KEY:
 PHOTO: performers/nyx.jpg
 FULL: performers/nyx-full.jpg, performers/nyx.jpg
-KINKS: Domme, Roleplay, Tease
-INTERESTS: Cabaret, VIP Shows
-VIBES: Gothic, Elegant, Mysterious
+KINKS: Domme, Roleplay
+INTERESTS: Cabaret, VIP Shows, Gothic / Alternative
+VIBES: Tease, Elegant, Mysterious
 ABOUT: A seductive blend of darkness and elegance. Nyx brings high-energy performances, immersive roleplay, and a touch of the divine to every show.
 MORE: Sample text. Replace this with the longer story: what a booking with this performer is like, favorite scenes, what they love to do on stage, and anything a patron should know first.
 
 NAME: Luna Maré
-KEY:aef51a4c-94b3-448d-9564-c8753a5d1576
+KEY:
 PHOTO: performers/luna.jpg
 FULL: performers/luna.jpg
-KINKS: Tease, Roleplay
+KINKS: Roleplay
 INTERESTS: Cosplay, VIP Shows
-VIBES: Romantic, Dreamy, Sweet
+VIBES: Tease, Romantic, Dreamy, Sweet
 ABOUT: Soft moonlight and slow smiles. Luna makes every guest feel like the only person in the room.
 MORE: Sample text. Replace this with the longer story for this performer.
 
@@ -40,7 +45,7 @@ KEY:
 PHOTO: performers/seraphine.jpg
 FULL: performers/seraphine.jpg
 KINKS: Roleplay, Slow Burn
-INTERESTS: Cabaret, VIP Shows, Conversation
+INTERESTS: Cabaret, VIP Shows, Deep Talks
 VIBES: Romantic, Elegant
 ABOUT: Old Hollywood glamour with a wicked sense of humor. Seraphine lives for a long conversation and a slower pace.
 MORE: Sample text. Replace this with the longer story for this performer.
@@ -50,8 +55,8 @@ KEY:
 PHOTO: performers/raven.jpg
 FULL: performers/raven.jpg
 KINKS: Domme, Roleplay
-INTERESTS: VIP Shows, Live Music
-VIBES: Gothic, Fiery, Bold
+INTERESTS: VIP Shows, Music, Gothic / Alternative
+VIBES: Fiery, Bold
 ABOUT: Red hair, sharp wit, and absolutely in charge. Raven decides how the night goes, and you'll thank her for it.
 MORE: Sample text. Replace this with the longer story for this performer.
 
@@ -59,9 +64,9 @@ NAME: Eden Kaine
 KEY:
 PHOTO: performers/eden.jpg
 FULL: performers/eden.jpg
-KINKS: Tease, Roleplay, Slow Burn
-INTERESTS: Cosplay, Gaming
-VIBES: Playful, Sweet, Romantic
+KINKS: Roleplay, Slow Burn
+INTERESTS: Cosplay, Gamer / Nerdy
+VIBES: Tease, Playful, Sweet, Romantic
 ABOUT: Quick to laugh and quicker to dare you. Eden turns any quiet night into a game you want to keep playing.
 MORE: Sample text. Replace this with the longer story for this performer.
 
@@ -69,8 +74,8 @@ NAME: Violet Saint
 KEY:
 PHOTO: performers/violet.jpg
 FULL: performers/violet.jpg
-KINKS: Tease
+KINKS:
 INTERESTS: Cabaret, Cosplay, VIP Shows
-VIBES: Playful, Bold, Dreamy
+VIBES: Tease, Playful, Bold, Dreamy
 ABOUT: A showgirl from curls to heels. Violet loves a spotlight, a costume change, and a room that cheers.
 MORE: Sample text. Replace this with the longer story for this performer.
