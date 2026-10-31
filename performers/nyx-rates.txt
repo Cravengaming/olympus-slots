@@ -1,0 +1,138 @@
+# Sample rate card, for showing the layout only. Replace everything in it. Copy this file for
+# each performer and give it their name, like raven-rates.txt.
+#
+# - INTRO is the short hello at the top. Keep it to a sentence or two.
+# - TAB starts a new tab along the top. CARD starts a new box inside that tab.
+# - A line with = in it is a price: what's on the left, then the price on the right.
+# - Any other line is a small note in that box.
+# - This file is public, so keep the wording tasteful. Full details can go in the notecard.
+
+INTRO: Sample rate card. Replace this with a short hello from the performer.
+
+TAB: Sessions
+
+CARD: Pose-Ball Session
+No text, voice or toys
+15 minutes = L$3,000
+30 minutes = L$5,000
+60 minutes = L$8,000
+
+CARD: Text Session
+15 minutes = L$4,000
+30 minutes = L$7,000
+60 minutes = L$12,000
+
+CARD: Voice Session
+15 minutes = L$7,000
+30 minutes = L$11,000
+45 minutes = L$14,000
+60 minutes = L$18,000
+
+CARD: Lovense With Voice
+One toy, sync on request
+15 minutes = L$10,000
+30 minutes = L$14,000
+45 minutes = L$18,000
+60 minutes = L$24,000
+Machine add-on = L$5,000 per 15 min
+
+CARD: Group Sessions
+Each staff member added = L$2,000
+Each guest added = L$4,000
+
+CARD: Add-Ons
+Added to the service rate
+D/s = L$150 per minute
+Extra toys = L$1,000 per toy
+
+TAB: Cam
+
+CARD: Hangout Cam
+Just chatting, no adult content
+15 minutes = L$9,000
+30 minutes = L$12,000
+60 minutes = L$16,000
+
+CARD: Tease Cam
+15 minutes = L$12,000
+30 minutes = L$18,000
+45 minutes = L$25,000
+60 minutes = L$40,000
+
+CARD: Full Cam Show
+15 minutes = L$15,000
+30 minutes = L$22,000
+45 minutes = L$30,000
+60 minutes = L$50,000
+
+CARD: Cam With Lovense Control
+15 minutes = L$20,000
+30 minutes = L$30,000
+45 minutes = L$40,000
+60 minutes = L$70,000
+4 hours, split up = L$260,000
+
+CARD: Availability
+Scheduled bookings preferred
+
+TAB: Watching
+
+CARD: Watching With Text
+15 minutes = L$7,000
+30 minutes = L$10,000
+45 minutes = L$14,000
+60 minutes = L$18,000
+
+CARD: Watching With Voice
+15 minutes = L$10,000
+30 minutes = L$15,000
+45 minutes = L$19,000
+60 minutes = L$24,000
+
+CARD: Add-On
+Lovense = L$2,500 per 15 min
+
+TAB: Gaming
+
+CARD: Gaming Session
+SFW, 30 minutes = L$6,000
+SFW, 60 minutes = L$10,000
+
+CARD: Add Cam
+Per 30 minutes = L$5,000
+
+TAB: Girlfriend Experience
+
+CARD: Date Night
+Movies, cuddles, games and romance
+One hour = L$8,000
+One week, 8 hours total = L$60,000
+
+CARD: Full Girlfriend Experience
+One hour = L$13,000
+One week, 8 hours total = L$90,000
+
+TAB: Terms
+
+CARD: Booking
+You must be 18 or older.
+Payment comes first, through the tip jars.
+No refunds, credit or freebies.
+Prices can change at any time.
+By booking, you agree to these terms.
+
+CARD: During A Session
+If you crash, I'll wait 10 minutes for you.
+Please do the same if I crash.
+No reply for an hour means the service is complete.
+If I can't return, I'll reschedule. IM me or send a notecard.
+
+CARD: Respect
+No recording, selling or sharing my services.
+If I use my safe word and you ignore it, I leave.
+
+TAB: Limits
+
+CARD: Hard Limits
+No ageplay, ever. If I suspect you're underage, I leave.
+Replace this with the performer's own limits.
