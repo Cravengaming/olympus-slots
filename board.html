@@ -8,10 +8,11 @@
      t=club name, tot=spins.jackpots, n=sequence,
      top=name.points.spins.jackpots,... (best first)
      last=name.reels.outcome.points.dancer,... (newest first; reels like "555")
-     goals=dancer.raised.goal.promise,... (tip goals), hit=dancer.goal.promise (Olympus Unlocked show)
+     goals=dancer.raised.goal.promise,... (tip goals), hit=dancer.goal.promise (Harmonia Unlocked show)
      Names are URL-escaped, so "." and "," inside them never clash. With no "#", it plays a demo.
      Look and symbols come from theme.css and club.js. -->
-<link rel="stylesheet" href="theme.css">
+<!-- ?r=<stamp> goes on the shared files too, so a Refresh gets their newest copies -->
+<script>document.write(`<link rel="stylesheet" href="theme.css${location.search}">`);</script>
 <style>
   header { position: absolute; left: 40px; right: 40px; top: 30px; height: 54px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
   .heading { display: flex; align-items: baseline; gap: 16px; }
@@ -70,7 +71,7 @@
   .gbar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #ff4fd8, #ffe27a); box-shadow: 0 0 10px #ff4fd8; transition: width .8s; }
   .gprom { font-size: 13px; font-weight: 700; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Olympus Unlocked: a dancer reached her tip goal */
+  /* Harmonia Unlocked: a dancer reached her tip goal */
   #ushow { position: absolute; inset: 0; z-index: 3; display: none;
            background: radial-gradient(60% 60% at 50% 50%, #ffd23f33, transparent 70%),
                        linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
@@ -163,7 +164,7 @@
   <div id="err"></div>
 </div>
 <script>window.onerror = m => { document.getElementById('err').textContent = 'Screen error: ' + m; };</script>
-<script src="club.js"></script>
+<script>document.write(`<script src="club.js${location.search}"><\/script>`);</script>
 <script>
 const stage = $('stage');
 const fx = Fx($('fx'));
@@ -210,7 +211,7 @@ function render(d, animate, fresh) {
   if (animate && d.last[0]) {
     setTimeout(() => document.querySelectorAll('.mini.rolling').forEach(m => m.classList.remove('rolling')), 1300);
     let spins = fresh >= 0 ? fresh : 1;
-    if (d.hit) spins--;   // the update that carries Olympus Unlocked isn't a spin
+    if (d.hit) spins--;   // the update that carries Harmonia Unlocked isn't a spin
     if (d.group.length) { const g = d.group, payer = d.payer; queueShow(() => playGroupShow(g, payer)); }
     else {
       // Several spins can land between two updates: show each of them, oldest first

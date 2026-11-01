@@ -8,7 +8,8 @@
      s=live|paused, t=club name, pl=current tipper, q=spins waiting, gr/gg/gt=tip goal raised, goal, promise, mx=max level, n=sequence,
      r=last reels "a,b,c", o=outcome, l=label, lv=level or preset name, sec=reward seconds, at=reward start (unix).
      With no "#", it plays a demo. Look and symbols come from theme.css and club.js. -->
-<link rel="stylesheet" href="theme.css">
+<!-- ?r=<stamp> goes on the shared files too, so a Refresh gets their newest copies -->
+<script>document.write(`<link rel="stylesheet" href="theme.css${location.search}">`);</script>
 <style>
   header { position: absolute; left: 40px; right: 40px; top: 30px; height: 54px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
   .heading { display: flex; align-items: baseline; gap: 14px; }
@@ -60,7 +61,7 @@
     <div id="timebar"><div id="timefill"></div></div><div id="timetxt"></div></div>
   <footer>Click the HUD for the menu · STOP is always in the menu</footer>
 </div>
-<script src="club.js"></script>
+<script>document.write(`<script src="club.js${location.search}"><\/script>`);</script>
 <script>
 const PRESETS = { pulse: 'Pulse pattern', wave: 'Wave pattern', fireworks: 'Fireworks pattern', earthquake: 'Earthquake pattern' };
 const stage = $('stage');
