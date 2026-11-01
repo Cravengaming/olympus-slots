@@ -3,7 +3,7 @@
 // Symbol order matches the controller's reels:
 // 0 Athena, 1 Artemis, 2 Dionysus, 3 Aphrodite, 4 Poseidon, 5 Zeus (jackpot).
 
-const CLUB_DEFAULT = 'Olympus';
+const CLUB_DEFAULT = 'Harmonia';
 const GODS = [
   { name: 'Athena', color: '#c9d4ff' },
   { name: 'Artemis', color: '#c3b4ff' },
@@ -74,7 +74,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const dec = s => { try { return decodeURIComponent(s || ''); } catch (e) { return s || ''; } };
 const nowSec = () => Math.floor(Date.now() / 1000);
 // Each god's signature rhythm, for the control screen's toy meter.
-// Keep in sync with RHYTHMS in the controller script.
+// Keep in sync with RHYTHMS in the Toy Link script.
 const RHYTHMS = {
   thunder: { label: 'Thunderstorm', ms: 600, steps: '6;8;6;9;7;20;20;8;10;7;9;20;20;20;9;11;8;12;10;20;18;20;12;14;16;18;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20;20' },
   tide: { label: 'Rolling tide', ms: 400, steps: '4;6;9;12;15;16;15;12;9;6;6;9;12;15;18;19;18;15;12;9;8;11;14;17;20;20;20;17;14;11;8;11;14;17;20;20;20;17;14;11;8;11;14;17;20;20;20;17;14;11' },
@@ -82,7 +82,7 @@ const RHYTHMS = {
   party: { label: 'Party beat', ms: 235, steps: '16;4;12;4;18;4;12;4;16;4;12;4;18;4;12;4;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;18;6;14;6;20;6;14;6;20;20' },
   climb: { label: 'Disciplined climb', ms: 500, steps: '6;6;6;8;8;8;10;10;10;12;12;12;14;14;14;16;16;16;18;18;18;18;18;18' },
   arrows: { label: 'Volley of arrows', ms: 150, steps: '20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;3;20;3;20;3;3;3;3;20;20;20;3;3' },
-  olympus: { label: 'Olympus Unlocked', ms: 600, steps: '12;14;16;18;20;20;14;16;18;20;20;20;14;18;20;20;20;20;16;20;20;20;20;20;20;8;20;8;20;8;20;20;20;20;20;20;12;20;12;20;12;20;20;20;20;20;20;20;20;20' },
+  olympus: { label: 'Harmonia Unlocked', ms: 600, steps: '12;14;16;18;20;20;14;16;18;20;20;20;14;18;20;20;20;20;16;20;20;20;20;20;20;8;20;8;20;8;20;20;20;20;20;20;12;20;12;20;12;20;20;20;20;20;20;20;20;20' },
   tease: { label: 'Tease', ms: 300, steps: '3;6;3;7;4;7;4;8;5;8;5;9;5;9;6;9;6;10;6;10;7;10;7;11;7;11;8' }
 };
 Object.values(RHYTHMS).forEach(r => r.steps = r.steps.split(';').map(Number));
@@ -373,7 +373,7 @@ function celebrate(stage, fx, outcome, godtext, tide, sub, sound) {
       later(2500, () => fx.burst(260, ['confetti', 'coin', 'heart', 'star'], ['#c77dff', '#ffe27a', '#ff4fd8', '#ffffff'], 'center'));
       later(5000, () => fx.burst(300, ['coin', 'star', 'petal', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#3ff3ff'], 'top'));
       if (S) { S.thunder(); later(900, () => S.fanfare()); later(2400, () => S.harp([523, 659, 784, 1047, 1319, 1568, 2093])); later(3600, () => S.fanfare()); later(5200, () => S.thunder()); }
-      show('unlock', 'OLYMPUS UNLOCKED', 8800);
+      show('unlock', 'HARMONIA UNLOCKED', 8800);
       break;
     case 'PAIR':
       fx.burst(110, ['star', 'spark'], ['#ffe27a', '#ffffff', '#ff4fd8', '#3ff3ff'], 'center');
