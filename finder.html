@@ -10,194 +10,173 @@
      st=one digit per performer in file order (2 performing now, 1 in the club, 0 away),
      ack=<click number>.<result> (0 done, 1 too soon, 2 no avatar key for that performer).
      With no "#", it runs as a demo. Look comes from theme.css and club.js. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap">
-<link rel="stylesheet" href="theme.css">
+<!-- ?r=<stamp> goes on the shared files too, so each open gets their newest copies -->
+<script>document.write(`<link rel="stylesheet" href="theme.css${location.search}">`);</script>
 <style>
-  :root { --serif: "Cormorant Garamond", Georgia, serif; --trim: #d9b45b; --panel: linear-gradient(160deg, #1b1149f5, #0b0a30f5); }
-  .key, .pool { display: none; }
-  .neon { inset: 5px; border-radius: 14px; }
-  button { font-family: var(--body-font); color: var(--ink); cursor: pointer; }
+  button { font-family: var(--body-font); font-weight: 700; color: var(--ink); cursor: pointer; }
+  .hud-btn:disabled, .cta:disabled { opacity: .4; box-shadow: none; }
 
-  /* marble hall around the panels */
-  .frieze { position: absolute; left: 0; right: 0; top: 0; height: 15px; background: repeating-linear-gradient(90deg, #fbf8ff 0 12px, #d6cdee 12px 14px); box-shadow: 0 2px 14px #ff4fd877; }
-  .frieze::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; background: linear-gradient(90deg, #ff4fd8, #3ff3ff, #ff4fd8); box-shadow: 0 0 10px #ff4fd8; }
-  .column { width: 24px; top: 28px; }
-  .column.l { left: 18px; }
-  .column.r { right: 18px; }
-  .column .vine { left: -11px; transform: scaleX(.62); transform-origin: 0 0; }
+  /* crest: the club's name between laurels, with the HUD's name on marble */
+  #head { position: absolute; left: 0; right: 0; top: 11px; z-index: 3; text-align: center; pointer-events: none; }
+  #head .crest { font-size: 32px; height: 38px; }
+  #club { font-size: 32px; display: inline-block; line-height: 1.1; }
+  #subtitle { display: inline-block; padding: 0 18px; font-style: italic; font-weight: 700; font-size: 16px; line-height: 21px; }
 
-  .glass { background: var(--panel); border: 1px solid #d9b45b99; border-radius: 12px; box-shadow: 0 0 0 1px #0007, 0 6px 18px #0007, inset 0 0 26px #ff4fd812; }
-
-  #plaque { position: absolute; left: 50%; top: 12px; width: 452px; height: 56px; margin-left: -226px; z-index: 3; border-radius: 28px; text-align: center; padding-top: 6px;
-            background: linear-gradient(#20145bf7, #0d0b38f7); border: 1.5px solid var(--trim); box-shadow: 0 0 0 3px #0b0a30, 0 0 0 4px #d9b45b77, 0 0 18px #ff4fd855; }
-  #title { font-family: var(--title-font); font-weight: 700; font-size: 25px; letter-spacing: 4px; line-height: 1.15; color: #fff; text-transform: uppercase; text-shadow: 0 0 10px #b26bff; white-space: nowrap; }
-  #subtitle { font-weight: 700; font-size: 9px; letter-spacing: 4px; color: var(--dim); text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
-
-  .pill { height: 30px; padding: 0 14px; border-radius: 15px; border: 1px solid #d9b45b99; background: #0d0b38e6; font-weight: 700; font-size: 12px; }
-  .pill:hover { border-color: var(--neon-cyan); box-shadow: 0 0 10px #3ff3ff66; }
-  #close { position: absolute; right: 56px; top: 25px; z-index: 3; width: 30px; padding: 0; font-size: 16px; line-height: 1; }
-  #back { position: absolute; left: 56px; top: 25px; z-index: 3; }
-  #found { position: absolute; left: 200px; top: 25px; width: 96px; z-index: 3; height: 30px; line-height: 30px; font-weight: 700; font-size: 12px; color: var(--gold); white-space: nowrap; }
-  #pager { position: absolute; right: 96px; top: 25px; z-index: 3; display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; }
-  #pager button { width: 30px; padding: 0; font-size: 15px; }
-  #pager button:disabled { opacity: .35; box-shadow: none; }
+  .small { height: 32px; padding: 0 12px; font-size: 13px; letter-spacing: 1px; }
+  #back { position: absolute; left: 34px; top: 24px; z-index: 3; }
+  #found, #count { position: absolute; top: 25px; z-index: 3; height: 30px; align-items: center; font-size: 16px; color: var(--gold-light); }
+  #found { left: 214px; }
+  #count { left: 34px; }
+  #close { position: absolute; right: 34px; top: 24px; z-index: 3; width: 32px; padding: 0; font-size: 18px; }
+  #pager { position: absolute; right: 76px; top: 24px; z-index: 3; display: flex; align-items: center; gap: 7px; font-size: 16px; color: var(--gold-light); }
+  #pager button { width: 32px; padding: 0; font-size: 18px; }
 
   section { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: none; }
   section.show { display: block; }
 
-  /* first screen: what are you in the mood for? */
-  #ask h2 { position: absolute; left: 56px; right: 56px; top: 72px; margin: 0; text-align: center; font-family: var(--serif); font-weight: 700; font-size: 22px; color: #fff; text-shadow: 0 0 12px #ff4fd8aa; }
-  #groups { position: absolute; left: 56px; right: 56px; top: 102px; height: 328px; display: flex; gap: 12px; }
-  .group { flex: 1; min-width: 170px; padding: 9px 9px; display: flex; flex-direction: column; }
-  .group h3 { margin: 0 0 6px; font-family: var(--title-font); font-weight: 700; font-size: 15px; letter-spacing: 3px; color: var(--c); text-shadow: 0 0 10px var(--c); text-align: center; }
-  .picks { display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
-  .pick { height: 21px; padding: 0 7px; border-radius: 11px; border: 1px solid var(--c); background: #ffffff0a; font-weight: 700; font-size: 10px; white-space: nowrap; transition: background .15s, box-shadow .15s; }
+  /* first screen: the tagline, then a panel each for kinks, interests and vibes */
+  #tagline { position: absolute; left: 34px; right: 34px; top: 73px; margin: 0; text-align: center; font-size: 19px; line-height: 22px; color: #ffc4f6; text-shadow: 0 0 4px var(--plum), 0 1px 8px var(--plum), 0 0 12px var(--neon-pink); }
+  #groups { position: absolute; left: 34px; right: 34px; top: 100px; height: 340px; display: flex; gap: 10px; }
+  .group { flex: 1; min-width: 170px; padding: 8px 8px; display: flex; flex-direction: column; --cut: 9px; }
+  .group .heading { margin-bottom: 5px; }
+  .picks { display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 3px; overflow-y: auto; flex: 1; scrollbar-width: thin; scrollbar-color: #d9b57377 transparent; }
+  .pick { height: 22px; padding: 0 6px; border-radius: 6px; border: 1px solid var(--c); background: #ffffff0a; font-size: 15px; line-height: 18px; white-space: nowrap; transition: background .15s, box-shadow .15s; }
   .pick:hover { box-shadow: 0 0 10px var(--c); }
-  .pick.on { background: var(--c); color: #140a35; box-shadow: 0 0 14px var(--c); }
-  #cta { position: absolute; left: 56px; right: 56px; top: 438px; height: 50px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-  #count { position: absolute; left: 0; width: 250px; font-weight: 700; font-size: 12.5px; color: var(--gold); }
+  .pick.on { border-color: var(--gold-light); background: linear-gradient(var(--gold-light), var(--gold)); color: var(--plum); box-shadow: 0 0 12px #d9b573aa; }
+  #cta { position: absolute; left: 34px; right: 34px; top: 447px; height: 40px; display: flex; align-items: center; justify-content: center; gap: 14px; }
 
-  .act { height: 42px; padding: 0 22px; border-radius: 9px; font-family: var(--title-font); font-weight: 700; font-size: 14px; letter-spacing: 1.5px; white-space: nowrap; background: #1b0a4d; }
-  .act.hot { border: 2px solid #ff7be2; background: linear-gradient(#ff2fd1, #c21fb8); box-shadow: 0 0 14px #ff4fd8cc, inset 0 0 10px #ffffff44; }
-  .act.cool { border: 2px solid #5f9bff; background: #101a5c; box-shadow: 0 0 12px #4f8cffaa, inset 0 0 8px #4f8cff55; }
-  .act:hover { filter: brightness(1.2); }
-
-  /* results: cards, details and the big photo */
-  #grid { position: absolute; left: 56px; top: 76px; width: 702px; height: 216px; display: grid; grid-template: 104px 104px / repeat(3, 228px); gap: 8px 9px; }
-  .card { position: relative; padding: 4px; display: flex; gap: 8px; text-align: left; border-radius: 10px; border: 1.5px solid #6b5aa8; background: var(--panel); box-shadow: 0 4px 12px #0007; overflow: hidden; transition: box-shadow .2s, border-color .2s; }
+  /* results: cards on the left, the full photo in the middle, details on the right */
+  #grid { position: absolute; left: 34px; top: 84px; width: 361px; height: 404px; display: grid; grid-template-rows: repeat(6, 64px); gap: 4px; }
+  .card { position: relative; padding: 5px 7px 5px 5px; display: flex; gap: 8px; text-align: left; border-radius: 7px; border: 1px solid #d9b57366; background: linear-gradient(160deg, #240b4c, #17052f); box-shadow: 0 2px 8px #0008; overflow: hidden; transition: box-shadow .2s, border-color .2s; }
   .card:hover { border-color: var(--neon-cyan); }
-  .card.on { border-color: #ff8bea; box-shadow: 0 0 0 1px #ff4fd8, 0 0 16px #ff4fd8cc, inset 0 0 14px #ff4fd833; }
-  .shot { flex: none; background: linear-gradient(#5a1a9a, #2b0f6b); overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; color: #fff; }
+  .card.on { border-color: #ff7be9; box-shadow: 0 0 12px #ff2ee6cc, inset 0 0 12px #ff2ee633; }
+  .shot { flex: none; background: linear-gradient(var(--neon-violet), var(--plum)); overflow: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--title-font); font-weight: 700; color: #fff; }
   .shot img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 15%; display: block; }
-  .thumb { width: 82px; height: 93px; border-radius: 7px; font-size: 40px; }
-  .info { flex: 1; min-width: 0; padding-top: 2px; }
-  .nm { font-family: var(--serif); font-weight: 700; font-size: 18px; line-height: 1.05; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .stat { display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 10.5px; margin: 3px 0 5px; white-space: nowrap; color: var(--dim); }
+  .thumb { width: 46px; height: 52px; border-radius: 4px; font-size: 24px; }
+  .cinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; }
+  .crow { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
+  .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 20px; line-height: 24px; color: var(--marble); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; white-space: nowrap; color: var(--dim); }
   .stat i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; flex: none; }
-  .stat.s2 { color: #7dffc0; }
+  .stat.s2 { color: var(--neon-cyan); }
   .stat.s2 i { animation: blink 1.2s infinite; }
-  .stat.s1 { color: #ff8bea; }
-  .stat.s0 { color: #a79cc9; }
+  .stat.s1 { color: var(--blush); }
   .stat.s0 i { box-shadow: none; opacity: .6; }
   @keyframes blink { 50% { opacity: .35; } }
-  .chips { display: flex; flex-wrap: wrap; gap: 3px; }
-  .card .chips { max-height: 37px; overflow: hidden; }
-  .tag { height: 17px; line-height: 15px; padding: 0 6px; border-radius: 9px; border: 1px solid #b26bff99; background: #ffffff0a; font-weight: 700; font-size: 9.5px; white-space: nowrap; }
-  .tag.hit { border-color: var(--gold); background: var(--gold); color: #1d0f3f; }
-  .pct { position: absolute; left: 7px; bottom: 7px; padding: 1px 6px; border-radius: 8px; font-weight: 800; font-size: 9px; color: #1d0f3f; background: var(--gold); box-shadow: 0 0 8px #ffb300aa; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .card .chips { flex: 1; min-width: 0; max-height: 22px; overflow: hidden; }
+  .tag { height: 22px; line-height: 19px; padding: 0 7px; border-radius: 6px; border: 1px solid #b98aff99; background: #ffffff0a; font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .tag.hit { border-color: var(--gold-light); background: linear-gradient(var(--gold-light), var(--gold)); color: var(--plum); }
+  .pct { flex: none; font-weight: 700; font-size: 15px; font-style: italic; line-height: 22px; color: var(--gold-light); }
 
-  #detail { position: absolute; left: 56px; top: 300px; width: 702px; height: 196px; padding: 12px 18px; display: flex; gap: 18px; }
-  #dleft { width: 344px; min-width: 0; }
-  #dname { font-family: var(--serif); font-weight: 700; font-size: 38px; line-height: 1; padding-bottom: 5px; border-bottom: 1px solid #d9b45b77; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #detail .stat { font-size: 12.5px; margin: 8px 0 7px; }
-  #detail .stat i { width: 10px; height: 10px; }
-  #dabout { margin: 0; font-weight: 500; font-size: 12.5px; line-height: 1.42; color: #efe8ff; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
-  #dright { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .rule { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-weight: 700; font-size: 17px; white-space: nowrap; }
-  .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: #d9b45b88; }
-  #dtags { flex: 1; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 6px; margin-top: 9px; overflow: hidden; }
-  #dtags .tag { height: 23px; line-height: 21px; padding: 0 11px; font-size: 11.5px; border-radius: 12px; }
-  #actions { height: 42px; display: flex; gap: 10px; align-items: center; justify-content: center; }
-  #actions .act { flex: 1; padding: 0 6px; font-size: 13px; }
-  #actions .msg { font-weight: 700; font-size: 12.5px; line-height: 1.25; color: var(--gold); text-align: center; }
-  #actions.ask .act { flex: none; padding: 0 12px; }
-  #actions.ask .msg { flex: 1; text-align: left; }
+  .pane { position: absolute; left: 629px; top: 84px; width: 361px; height: 404px; padding: 14px 18px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .pane.lhs { left: 34px; }
+  .pname { max-width: 100%; font-family: var(--title-font); font-weight: 700; font-size: 25px; letter-spacing: 1px; line-height: 32px; color: #fff; text-shadow: 0 0 10px var(--neon-pink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pane .stat { margin: 2px 0 8px; font-size: 16px; }
+  #dabout { margin: 0 0 10px; font-size: 16px; line-height: 20px; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+  #dtags { flex: 1; min-height: 0; display: flex; flex-wrap: wrap; align-content: flex-start; justify-content: center; gap: 5px; margin-top: 8px; overflow: hidden; }
+  #actions { width: 100%; min-height: 40px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+  #actions .msg { width: 100%; font-weight: 700; font-style: italic; font-size: 16px; line-height: 20px; color: var(--gold-light); text-align: center; }
+  #actions .cta[data-do=more] { width: 100%; }
 
-  #photo { position: absolute; left: 770px; top: 76px; width: 198px; height: 420px; border: 1.5px solid var(--trim); border-radius: 14px; overflow: hidden; background: #150c44; box-shadow: 0 0 0 1px #0007, 0 0 16px #b26bff66; }
-  #bigshot { position: absolute; inset: 0; font-size: 90px; }
+  #photo { position: absolute; left: 407px; top: 84px; width: 210px; height: 404px; --cut: 12px; }
+  #bigshot { position: absolute; inset: 2px; font-size: 90px; clip-path: polygon(11px 0, calc(100% - 11px) 0, 100% 11px, 100% calc(100% - 11px), calc(100% - 11px) 100%, 11px 100%, 0 calc(100% - 11px), 0 11px); }
   #bigshot img { object-position: 50% 0; animation: fadein .35s; }
   @keyframes fadein { from { opacity: 0; } }
-  .nav { position: absolute; top: 50%; width: 28px; height: 40px; margin-top: -20px; padding: 0; border: 1px solid #ffffff44; border-radius: 6px; background: #0b0a30b0; font-size: 18px; }
+  .nav { position: absolute; top: 50%; width: 28px; height: 40px; margin-top: -20px; padding: 0; border: 1px solid #54b4ff; border-radius: 6px; background: #16063ad9; font-size: 20px; box-shadow: 0 0 8px #2f8cff99; }
   #prev { left: 6px; }
   #next { right: 6px; }
-  #dots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; gap: 7px; justify-content: center; }
+  #dots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; gap: 7px; justify-content: center; }
   #dots i { width: 7px; height: 7px; border-radius: 50%; background: #ffffff66; }
   #dots i.on { background: #fff; box-shadow: 0 0 6px #fff; }
 
   /* Learn More covers the cards and details and leaves the big photo showing */
-  #more { position: absolute; left: 56px; top: 76px; width: 702px; height: 420px; padding: 16px 22px; display: none; flex-direction: column; z-index: 2; background: linear-gradient(160deg, #1b1149, #0b0a30); }
-  #more.show { display: flex; }
-  #mname { font-family: var(--serif); font-weight: 700; font-size: 40px; line-height: 1; }
-  #more .stat { font-size: 12.5px; margin: 8px 0 10px; }
-  #mtext { flex: 1; min-height: 0; overflow-y: auto; font-weight: 500; font-size: 14px; line-height: 1.5; color: #efe8ff; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
-  #mtext p { margin: 0 0 8px; }
-  .mrow { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
-  .mrow b { flex: none; width: 76px; font-family: var(--title-font); font-weight: 700; font-size: 11px; letter-spacing: 1px; color: var(--gold); }
-  .mrow .chips { gap: 5px; }
-  .mrow .tag { height: 21px; line-height: 19px; padding: 0 9px; font-size: 11px; border-radius: 11px; }
-  #mbtns { display: flex; gap: 10px; margin-top: 12px; }
-  #mbtns .act { flex: 1; padding: 0 6px; font-size: 13px; }
+  #more { display: none; }
+  #more.show { display: block; }
+  #more .pane, #rates { z-index: 2; }
+  #more .pane::after, #rates::after { background: linear-gradient(160deg, #240b4c, #17052f); }
+  #mtext { flex: 1; min-height: 0; width: 100%; overflow-y: auto; font-size: 17px; line-height: 22px; color: var(--ink); scrollbar-width: thin; scrollbar-color: #d9b57377 transparent; }
+  #mtext p { margin: 0 0 9px; }
+  #mtags { flex: 1; min-height: 0; width: 100%; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d9b57377 transparent; }
+  .mrow { margin-bottom: 9px; }
+  .mrow .heading { margin-bottom: 5px; font-size: 13px; }
+  .mrow .chips { gap: 5px; justify-content: center; }
+  #mbtns { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  #mbtns button, #rbtns button { min-width: 0; padding: 0 4px; font-size: 13px; letter-spacing: .3px; }
 
-  /* the rate card covers everything below the title, big photo included */
-  #rates { position: absolute; left: 56px; top: 76px; width: 912px; height: 420px; padding: 10px 16px 12px; display: none; flex-direction: column; z-index: 2; background: linear-gradient(160deg, #1b1149, #0b0a30); }
+  /* the rate card covers everything below the crest, big photo included */
+  #rates { position: absolute; left: 34px; top: 84px; width: 956px; height: 404px; padding: 10px 16px 12px; display: none; flex-direction: column; }
   #rates.show { display: flex; }
-  #rname { font-family: var(--serif); font-weight: 700; font-size: 26px; line-height: 1; white-space: nowrap; }
-  #rintro { margin-top: 3px; font-weight: 500; font-size: 11.5px; line-height: 1.3; color: var(--dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  #rtabs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  #rname { text-align: center; font-family: var(--title-font); font-weight: 700; font-size: 21px; letter-spacing: 1px; line-height: 26px; color: #fff; text-shadow: 0 0 10px var(--neon-pink); white-space: nowrap; }
+  #rintro { font-style: italic; font-size: 15px; line-height: 18px; text-align: center; color: var(--dim); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #rtabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; margin-top: 6px; }
   #rtabs:empty { display: none; }
-  .rtab { height: 25px; padding: 0 12px; border-radius: 13px; border: 1px solid #d9b45b99; background: #0d0b38e6; font-weight: 700; font-size: 11.5px; }
-  .rtab.on { border-color: var(--gold); background: var(--gold); color: #1d0f3f; }
-  #rbody { flex: 1; min-height: 0; margin-top: 8px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d9b45b77 transparent; }
-  #rcols { column-count: 3; column-gap: 10px; }
-  .rbox { break-inside: avoid; margin-bottom: 8px; padding: 6px 9px 7px; border: 1px solid #6b5aa8; border-radius: 8px; background: #ffffff0a; }
-  .rbox h4 { margin: 0 0 3px; font-family: var(--serif); font-weight: 700; font-size: 15px; line-height: 1.1; color: #ff8bea; }
-  .rrow { display: flex; align-items: baseline; gap: 5px; font-weight: 600; font-size: 11.5px; line-height: 16px; }
+  .rtab { height: 25px; padding: 0 11px; border-radius: 6px; border: 1px solid #54b4ff; background: #16063ae6; font-size: 15px; line-height: 20px; }
+  .rtab.on { border-color: var(--gold-light); background: linear-gradient(var(--gold-light), var(--gold)); color: var(--plum); }
+  #rbody { flex: 1; min-height: 0; margin-top: 7px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #d9b57377 transparent; }
+  #rcols { column-count: 3; column-gap: 10px; margin-bottom: -8px; }
+  .rbox { break-inside: avoid; margin-bottom: 8px; padding: 5px 9px 6px; border: 1px solid #d9b57366; border-radius: 6px; background: #ffffff0a; }
+  .rbox h4 { margin: 0 0 2px; font-family: var(--title-font); font-weight: 700; font-size: 14px; letter-spacing: .5px; line-height: 19px; color: var(--blush); text-align: center; }
+  .rrow { display: flex; align-items: baseline; gap: 5px; font-size: 15px; line-height: 18px; }
   .rrow i { flex: 1; min-width: 8px; border-bottom: 1px dotted #ffffff44; }
-  .rrow b { font-weight: 800; color: var(--gold); white-space: nowrap; }
-  .rnote { margin: 1px 0 2px; font-weight: 500; font-size: 10.5px; line-height: 1.3; color: var(--dim); }
-  #rmsg { padding-top: 60px; text-align: center; font-weight: 700; font-size: 14px; color: var(--dim); }
+  .rrow b { font-weight: 700; color: var(--gold-light); white-space: nowrap; }
+  .rnote { margin: 1px 0 2px; font-style: italic; font-size: 15px; line-height: 17px; color: var(--dim); }
+  #rmsg { padding-top: 60px; text-align: center; font-style: italic; font-size: 17px; color: var(--dim); }
   #rbtns { display: flex; gap: 10px; margin-top: 8px; }
-  #rbtns .act { flex: 1; padding: 0 6px; font-size: 13px; }
+  #rbtns button { flex: 1; }
 
-  #err { position: absolute; left: 90px; right: 90px; top: 220px; z-index: 8; text-align: center; font-weight: 700; font-size: 16px; color: #ffb3c4; }
+  #err { position: absolute; left: 90px; right: 90px; top: 220px; z-index: 8; text-align: center; font-size: 18px; color: #ffb3c4; }
 </style>
 </head>
 <body>
 <div class="stage" id="stage">
-  <div class="frieze"></div>
-  <div class="column l" style="height:440px"></div>
-  <div class="column r" style="height:440px"></div>
-  <div id="plaque"><div id="title"></div><div id="subtitle"></div></div>
-  <button class="pill" id="back">‹ Change My Picks</button>
-  <div id="found"></div>
-  <div id="pager"><button class="pill" id="pgup" aria-label="Previous page">‹</button><span id="pgtxt"></span><button class="pill" id="pgdn" aria-label="Next page">›</button></div>
-  <button class="pill" id="close" aria-label="Close">×</button>
+  <div id="head">
+    <div class="crest"><span id="ll"></span><div class="title" id="club"></div><span id="lr"></span></div>
+    <div class="info marble" id="subtitle"></div>
+  </div>
+  <button class="hud-btn small" id="back">‹ Change My Picks</button>
+  <div class="plaque" id="found"></div>
+  <div class="plaque" id="count"></div>
+  <div id="pager"><button class="hud-btn small" id="pgup" aria-label="Previous page">‹</button><span id="pgtxt"></span><button class="hud-btn small" id="pgdn" aria-label="Next page">›</button></div>
+  <button class="hud-btn small" id="close" aria-label="Close">×</button>
 
   <section id="ask">
-    <h2 id="tagline"></h2>
+    <h2 class="subtitle" id="tagline"></h2>
     <div id="groups"></div>
-    <div id="cta"><div id="count"></div><button class="act hot" id="go">Find My Match</button><button class="act cool" id="all">Browse Everyone</button></div>
+    <div id="cta"><button class="cta" id="go">Find My Match</button><button class="hud-btn" id="all">Browse Everyone</button></div>
   </section>
 
   <section id="list">
     <div id="grid"></div>
-    <div class="glass" id="detail">
-      <div id="dleft"><div id="dname"></div><div class="stat" id="dstat"></div><p id="dabout"></p></div>
-      <div id="dright"><div class="rule">Specialties / Kinks</div><div id="dtags"></div><div id="actions"></div></div>
+    <div class="temple pane" id="detail">
+      <div class="pname" id="dname"></div><div class="stat" id="dstat"></div><p id="dabout"></p>
+      <h3 class="heading">Specialties / Kinks</h3><div id="dtags"></div><div id="actions"></div>
     </div>
-    <div class="glass" id="more">
-      <div id="mname"></div><div class="stat" id="mstat"></div>
-      <div id="mtext"></div>
-      <div id="mbtns"><button class="act cool" id="mback">‹ Back</button><button class="act cool" id="mprofile">Profile Link In Chat</button><button class="act cool" id="mrates">View Rates ›</button><button class="act hot" id="mbook">Request Booking</button></div>
-    </div>
-    <div class="glass" id="rates">
-      <div id="rname"></div><div id="rintro"></div>
-      <div id="rtabs"></div>
-      <div id="rbody"></div>
-      <div id="rbtns"><button class="act cool" id="rback">‹ Back</button><button class="act cool" id="rsite">Website Link In Chat</button><button class="act cool" id="rnote">Send Me The Notecard</button><button class="act hot" id="rbook">Request Booking</button></div>
-    </div>
-    <div id="photo">
+    <div class="temple" id="photo">
       <div class="shot" id="bigshot"></div>
       <button class="nav" id="prev" aria-label="Previous photo">‹</button><button class="nav" id="next" aria-label="Next photo">›</button>
       <div id="dots"></div>
     </div>
+    <div id="more">
+      <div class="temple pane lhs"><div class="pname" id="mname"></div><div class="stat" id="mstat"></div><div id="mtext"></div></div>
+      <div class="temple pane">
+        <div id="mtags"></div>
+        <div id="mbtns"><button class="hud-btn" id="mback">‹ Back</button><button class="hud-btn" id="mprofile">Profile Link In Chat</button><button class="hud-btn" id="mrates">View Rates ›</button><button class="cta" id="mbook">Request Booking</button></div>
+      </div>
+    </div>
+    <div class="temple" id="rates">
+      <div id="rname"></div><div id="rintro"></div>
+      <div id="rtabs"></div>
+      <div id="rbody"></div>
+      <div id="rbtns"><button class="hud-btn" id="rback">‹ Back</button><button class="hud-btn" id="rsite">Website Link In Chat</button><button class="hud-btn" id="rnote">Send Me The Notecard</button><button class="cta" id="rbook">Request Booking</button></div>
+    </div>
   </section>
   <div id="err"></div>
 </div>
-<script src="club.js"></script>
+<script>document.write(`<script src="club.js${location.search}"><\/script>`);</script>
 <script>
 const STATUS = ['Away', 'In the Club', 'Performing Now'];
-const GROUPS = [['kinks', 'Kinks', 'var(--neon-pink)'], ['interests', 'Interests', 'var(--neon-violet)'], ['vibes', 'Vibes', 'var(--neon-cyan)']];
+const GROUPS = [['kinks', 'Kinks', 'var(--neon-pink)'], ['interests', 'Interests', '#b98aff'], ['vibes', 'Vibes', 'var(--neon-cyan)']];
 const PER_PAGE = 6;
 const DEMO_STATUS = [2, 1, 1, 0, 1, 0];
 
@@ -206,7 +185,9 @@ let people = [], choices = {}, picks = new Set(), found = [], page = 0, sel = nu
 let hud = '', demo = true, clicks = 0, waiting = null, bookTimer = 0, rateCard = null, club = 'club';
 
 fit(stage);
-scenery(stage, [772, 26]);
+scenery(stage);
+$('ll').innerHTML = LAUREL(false);
+$('lr').innerHTML = LAUREL(true);
 
 const list = v => (v || '').split(',').map(w => w.trim()).filter(Boolean);
 
@@ -233,8 +214,8 @@ function readRoster(text) {
   people.forEach(p => { p.tags = [...p.kinks, ...p.interests, ...p.vibes]; if (!p.full.length && p.photo) p.full = [p.photo]; });
   GROUPS.forEach(([key]) => choices[key] = list(info[key.toUpperCase()]));
   club = info.CLUB || 'club';
-  $('title').textContent = info.TITLE || 'Harmonia';
-  document.title = info.TITLE || 'Harmonia';
+  fitText($('club'), info.TITLE || CLUB_DEFAULT, 340, 32);
+  document.title = info.TITLE || CLUB_DEFAULT;
   $('subtitle').textContent = info.SUBTITLE || '';
   $('tagline').textContent = info.TAGLINE || '';
 }
@@ -245,6 +226,7 @@ const statusRow = p => `<i></i>${STATUS[p.status]}`;
 function show(id) {
   ['ask', 'list'].forEach(s => $(s).classList.toggle('show', s === id));
   $('back').style.display = $('found').style.display = id === 'list' ? '' : 'none';
+  $('count').style.display = id === 'ask' ? '' : 'none';
   if (id === 'ask') $('pager').style.display = 'none';
 }
 
@@ -255,7 +237,7 @@ function drawAsk() {
     choices[key].forEach(w => n[w] = 0);
     people.forEach(p => p[key].forEach(w => n[w] = (n[w] || 0) + 1));
     const words = Object.keys(n).sort((a, b) => n[b] - n[a] || a.localeCompare(b));
-    return `<div class="glass group" style="--c:${color};flex-grow:${words.join('').length + 3 * words.length}"><h3>${label}</h3><div class="picks">`
+    return `<div class="temple group" style="--c:${color};flex-grow:${words.join('').length + 3 * words.length}"><h3 class="heading">${label}</h3><div class="picks">`
       + words.map(w => `<button class="pick${picks.has(w) ? ' on' : ''}" data-w="${esc(w)}">${esc(w)}</button>`).join('') + `</div></div>`;
   }).join('');
   drawCount();
@@ -298,9 +280,9 @@ function drawCards() {
     const perfect = picks.size && hits.length === picks.size;
     return `<button class="card${p === sel ? ' on' : ''}" data-i="${p.i}">
       <div class="shot thumb">${picture(p.photo, p.name)}</div>
-      <div class="info"><div class="nm">${esc(p.name)}</div><div class="stat s${p.status}">${statusRow(p)}</div>
-      <div class="chips">${tags.map(t => `<span class="tag${hits.includes(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>
-      ${picks.size ? `<span class="pct">${perfect ? 'Perfect' : `${hits.length} of ${picks.size}`}</span>` : ''}</button>`;
+      <div class="cinfo"><div class="crow"><div class="nm">${esc(p.name)}</div><div class="stat s${p.status}">${statusRow(p)}</div></div>
+      <div class="crow"><div class="chips">${tags.map(t => `<span class="tag${hits.includes(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div>
+      ${picks.size ? `<span class="pct">${perfect ? 'Perfect' : `${hits.length} of ${picks.size}`}</span>` : ''}</div></div></button>`;
   }).join('');
 }
 
@@ -333,9 +315,9 @@ function drawPhoto() {
 
 function openMore() {
   $('mname').textContent = sel.name;
-  const row = (label, tags) => tags.length ? `<div class="mrow"><b>${label}</b><div class="chips">${tags.map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>` : '';
-  $('mtext').innerHTML = `<p>${esc(sel.about)}</p>${sel.more ? `<p>${esc(sel.more)}</p>` : ''}`
-    + row('Kinks', sel.kinks) + row('Interests', sel.interests) + row('Vibes', sel.vibes);
+  const row = (label, tags) => tags.length ? `<div class="mrow"><h3 class="heading">${label}</h3><div class="chips">${tags.map(t => `<span class="tag${picks.has(t) ? ' hit' : ''}">${esc(t)}</span>`).join('')}</div></div>` : '';
+  $('mtext').innerHTML = `<p>${esc(sel.about)}</p>${sel.more ? `<p>${esc(sel.more)}</p>` : ''}`;
+  $('mtags').innerHTML = row('Kinks', sel.kinks) + row('Interests', sel.interests) + row('Vibes', sel.vibes);
   $('mrates').style.display = sel.rates || sel.site || sel.card ? '' : 'none';
   $('more').classList.add('show');
 }
@@ -412,8 +394,8 @@ function bookState(state) {
   a.className = state === 'confirm' ? 'ask' : '';
   const say = text => `<div class="msg">${text}</div>`;
   a.innerHTML = {
-    idle: `<button class="act hot" data-do="more">Learn More ›</button>`,
-    confirm: `${say(`Send ${name} your name and a booking request?`)}<button class="act hot" data-do="send">Send</button><button class="act cool" data-do="idle">Cancel</button>`,
+    idle: `<button class="cta" data-do="more">Learn More ›</button>`,
+    confirm: `${say(`Send ${name} your name and a booking request?`)}<button class="cta" data-do="send">Send</button><button class="hud-btn" data-do="idle">Cancel</button>`,
     sending: say('Sending your request…'),
     sent: say(`Request sent! Watch for a message from ${name}.`),
     wait: say('Please wait a minute before sending another request.'),

@@ -9,7 +9,7 @@ const GODS = [
   { name: 'Artemis', color: '#c3b4ff' },
   { name: 'Dionysus', color: '#c77dff' },
   { name: 'Aphrodite', color: '#ff7ad1' },
-  { name: 'Poseidon', color: '#3ff3ff' },
+  { name: 'Poseidon', color: '#00e5ff' },
   { name: 'Zeus', color: '#ffe27a' }
 ];
 // Outcome names sent by the controller, as shown to people
@@ -21,17 +21,28 @@ const OUTCOMES = { JACKPOT: 'Zeus', POSEIDON: 'Poseidon', APHRODITE: 'Aphrodite'
   [[23, 30], [41, 30], [59, 30], [77, 30], [32, 46], [50, 46], [68, 46], [41, 62], [59, 62], [50, 78]]
     .forEach(([x, y]) => grapes += `<circle cx="${x}" cy="${y}" r="9.5" fill="url(#gDio)" stroke="#3a0a5e" stroke-width="2.5"/>`);
   let ribs = '';
-  [[20, 36], [30, 22], [40, 14], [50, 11], [60, 14], [70, 22], [80, 36]]
-    .forEach(([x, y]) => ribs += `<path d="M50 82L${x} ${y}" stroke="#b0206e" stroke-width="2.5" stroke-linecap="round"/>`);
+  // A laurel branch for the left of a title: leaves in pairs along a curve, smaller toward the tip
+  let laurel = '';
+  const curve = t => [(1 - t) * (1 - t) * 46 + 2 * t * (1 - t) * -8 + t * t * 34, (1 - t) * (1 - t) * 96 + 2 * t * (1 - t) * 58 + t * t * 8];
+  for (let i = 0; i < 8; i++) {
+    const t = .1 + i * .118, [x, y] = curve(t), [x2, y2] = curve(t + .02);
+    const rot = Math.atan2(y2 - y, x2 - x) * 180 / Math.PI + 90, s = 1.08 - t * .5;
+    [-34, 34].forEach(side => laurel += `<path transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(rot + side).toFixed(0)}) scale(${s.toFixed(2)})" d="M0 0C-5 -5 -5.5 -13 0 -20C5.5 -13 5 -5 0 0Z" fill="url(#gLaurel)"/>`);
+  }
   document.body.insertAdjacentHTML('afterbegin', `
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
   <linearGradient id="gAth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f6ff"/><stop offset="1" stop-color="#7c86c9"/></linearGradient>
   <linearGradient id="gArt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9d8cff"/></linearGradient>
   <radialGradient id="gDio" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#f3d2ff"/><stop offset=".5" stop-color="#b14dff"/><stop offset="1" stop-color="#5a12a0"/></radialGradient>
-  <linearGradient id="gAph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6f6"/><stop offset="1" stop-color="#ff4fb8"/></linearGradient>
+  <linearGradient id="gAph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6f6"/><stop offset="1" stop-color="#ff00b8"/></linearGradient>
   <linearGradient id="gPos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9ffff"/><stop offset="1" stop-color="#14b8d4"/></linearGradient>
   <linearGradient id="gZeus" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe0"/><stop offset=".5" stop-color="#ffd23f"/><stop offset="1" stop-color="#ff9f1c"/></linearGradient>
+  <linearGradient id="gLaurel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f3e0b5"/><stop offset="1" stop-color="#d9b573"/></linearGradient>
   <linearGradient id="gLeaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dffc0"/><stop offset="1" stop-color="#1f8a6a"/></linearGradient>
+  <symbol id="laurel" viewBox="0 0 60 100">
+    <path d="M46 96Q-8 58 34 8" fill="none" stroke="#d9b573" stroke-width="2" stroke-linecap="round"/>
+    ${laurel}
+  </symbol>
   <symbol id="god0" viewBox="0 0 100 100">
     <path d="M50 94C26 94 18 72 21 50L16 10L35 25Q50 19 65 25L84 10L79 50C82 72 74 94 50 94Z" fill="url(#gAth)" stroke="#2c2f6b" stroke-width="3.5" stroke-linejoin="round"/>
     <path d="M34 74q8 6 16 0q8 6 16 0M38 84q6 5 12 0q6 5 12 0" fill="none" stroke="#2c2f6b" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
@@ -142,18 +153,14 @@ function vineSvg(h, seed) {
     <path d="${front}" stroke="#3fae7a" stroke-width="3.2" stroke-linecap="round"/></svg>`;
 }
 
+// The two laurels around a title
+const LAUREL = (flip) => `<svg class="laurel${flip ? ' flip' : ''}" aria-hidden="true"><use href="#laurel"/></svg>`;
+
 function scenery(stage, moon) {
   stage.insertAdjacentHTML('afterbegin',
-    `<div class="grid"></div><div class="stars"></div><div class="pool"></div><div class="key top"></div><div class="key bottom"></div>`
+    `<div class="veil"></div><div class="pool"></div><div class="key top"></div><div class="key bottom"></div>`
     + `<div class="neon"></div><div class="wash"></div><div class="sweep"></div>`
     + (moon ? `<div class="moon" style="left:${moon[0]}px;top:${moon[1]}px"></div>` : ''));
-  const s = stage.querySelector('.stars');
-  for (let i = 0; i < 70; i++) {
-    const d = document.createElement('i');
-    d.style.left = (Math.random() * 100) + '%'; d.style.top = (Math.random() * 100) + '%';
-    d.style.animationDelay = (Math.random() * 3) + 's'; d.style.opacity = .3 + Math.random() * .7;
-    s.appendChild(d);
-  }
   // inline height, since a column inside a hidden layer has no measured size yet
   stage.querySelectorAll('.column').forEach((c, i) =>
     c.insertAdjacentHTML('beforeend', vineSvg(parseFloat(c.style.height) || c.offsetHeight, i % 2)));
@@ -329,20 +336,20 @@ function celebrate(stage, fx, outcome, godtext, tide, sub, sound) {
     case 'POSEIDON':
       replay(tide, 'show', 4300); replay(stage, 'sway', 3700);
       fx.burst(180, ['bubble'], ['#d8ffff'], 'bottom');
-      later(1300, () => fx.burst(120, ['bubble', 'spark'], ['#d8ffff', '#3ff3ff'], 'bottom'));
+      later(1300, () => fx.burst(120, ['bubble', 'spark'], ['#d8ffff', '#00e5ff'], 'bottom'));
       if (S) { S.wave(); S.harp([196, 247, 294, 392, 494, 587, 784, 988], .8); }
       show('poseidon', 'POSEIDON', 4200);
       break;
     case 'APHRODITE':
-      wash('#ff4fd8', 2800);
+      wash('#ff2ee6', 2800);
       fx.burst(240, ['petal', 'heart', 'petal'], ['#ff7ad1', '#ff2f6e', '#ffd1ec', '#ffffff'], 'top');
-      fx.burst(90, ['heart', 'spark'], ['#ff4fd8', '#ffffff', '#ff2f6e'], 'center');
+      fx.burst(90, ['heart', 'spark'], ['#ff2ee6', '#ffffff', '#ff2f6e'], 'center');
       if (S) { S.harp([523, 659, 784, 1047, 1319, 1568, 2093]); later(900, () => S.harp([784, 1047, 1319, 1568])); }
       show('aphrodite', 'APHRODITE', 3800);
       break;
     case 'DIONYSUS':
       replay(stage, 'bounce', 1200); wash('#b14dff', 2000);
-      fx.burst(200, ['confetti', 'grape', 'confetti'], ['#c77dff', '#5be3a0', '#ff4fd8', '#ffe27a', '#3ff3ff'], 'center');
+      fx.burst(200, ['confetti', 'grape', 'confetti'], ['#c77dff', '#5be3a0', '#ff2ee6', '#ffe27a', '#00e5ff'], 'center');
       later(500, () => fx.burst(160, ['confetti', 'grape'], ['#c77dff', '#5be3a0', '#ffe27a'], 'top'));
       if (S) S.party();
       show('dionysus', 'DIONYSUS', 3800);
@@ -369,14 +376,14 @@ function celebrate(stage, fx, outcome, godtext, tide, sub, sound) {
       [0, 700, 1600, 2600, 3800, 5200].forEach(w => later(w, () => fx.lightning(4)));
       fx.burst(160, ['bubble'], ['#d8ffff'], 'bottom');
       fx.arrows(8);
-      later(500, () => fx.burst(300, ['coin', 'star', 'petal', 'heart', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#ff2f6e', '#3ff3ff'], 'top'));
-      later(2500, () => fx.burst(260, ['confetti', 'coin', 'heart', 'star'], ['#c77dff', '#ffe27a', '#ff4fd8', '#ffffff'], 'center'));
-      later(5000, () => fx.burst(300, ['coin', 'star', 'petal', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#3ff3ff'], 'top'));
+      later(500, () => fx.burst(300, ['coin', 'star', 'petal', 'heart', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#ff2f6e', '#00e5ff'], 'top'));
+      later(2500, () => fx.burst(260, ['confetti', 'coin', 'heart', 'star'], ['#c77dff', '#ffe27a', '#ff2ee6', '#ffffff'], 'center'));
+      later(5000, () => fx.burst(300, ['coin', 'star', 'petal', 'confetti'], ['#ffe27a', '#ffffff', '#ff7ad1', '#00e5ff'], 'top'));
       if (S) { S.thunder(); later(900, () => S.fanfare()); later(2400, () => S.harp([523, 659, 784, 1047, 1319, 1568, 2093])); later(3600, () => S.fanfare()); later(5200, () => S.thunder()); }
       show('unlock', 'HARMONIA UNLOCKED', 8800);
       break;
     case 'PAIR':
-      fx.burst(110, ['star', 'spark'], ['#ffe27a', '#ffffff', '#ff4fd8', '#3ff3ff'], 'center');
+      fx.burst(110, ['star', 'spark'], ['#ffe27a', '#ffffff', '#ff2ee6', '#00e5ff'], 'center');
       wash('#ffe27a', 1400);
       if (S) S.sparkle();
       break;

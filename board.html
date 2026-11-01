@@ -14,97 +14,90 @@
 <!-- ?r=<stamp> goes on the shared files too, so a Refresh gets their newest copies -->
 <script>document.write(`<link rel="stylesheet" href="theme.css${location.search}">`);</script>
 <style>
-  header { position: absolute; left: 40px; right: 40px; top: 30px; height: 54px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
-  .heading { display: flex; align-items: baseline; gap: 16px; }
-  #club { font-size: 36px; display: inline-block; }
-  #totals { display: flex; gap: 10px; }
-  .chip { font-weight: 800; font-size: 17px; padding: 6px 14px; border-radius: 999px; background: #ffffff10; border: 2px solid #ffffff22; white-space: nowrap; }
-  .chip b { color: var(--gold); font-size: 21px; }
+  header { position: absolute; left: 34px; right: 34px; top: 16px; height: 72px; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
+  #crest { position: absolute; left: 50%; top: 0; width: 460px; margin-left: -230px; text-align: center; }
+  #club { font-size: 36px; display: inline-block; line-height: 1.1; }
+  #crest .crest { font-size: 36px; height: 44px; }
+  #crest .subtitle { font-size: 19px; line-height: 1.05; }
 
-  .panel { position: absolute; top: 96px; bottom: 40px; z-index: 2; border-radius: 16px; padding: 10px 14px;
-           background: #0a0b3d99; border: 2px solid #ffffff1c; box-shadow: inset 0 0 30px #ff4fd822; }
-  #left { left: 34px; width: 540px; }
-  #right { left: 590px; right: 34px; }
-  h2 { margin: 0 0 6px; font-family: var(--title-font); font-weight: 900; font-size: 18px; letter-spacing: 3px; color: var(--neon-cyan); text-shadow: 0 0 10px #3ff3ff88; }
+  .panel { position: absolute; top: 94px; bottom: 26px; width: 470px; z-index: 2; padding: 10px 14px; }
+  #left { left: 34px; }
+  #right { right: 34px; }
+  .panel .heading { margin-bottom: 7px; }
 
-  .row { position: relative; height: 60px; margin-bottom: 4px; border-radius: 12px; display: flex; align-items: center; gap: 12px; padding: 0 12px; overflow: hidden; }
-  .row .bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 12px; background: linear-gradient(90deg, #ff4fd833, #3ff3ff1a); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
+  .row { position: relative; height: 62px; margin-bottom: 4px; border-radius: 9px; display: flex; align-items: center; gap: 12px; padding: 0 12px; overflow: hidden; }
+  .row .bar { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9px; background: linear-gradient(90deg, #ff2ee62e, #8a2be21f); transition: width .8s cubic-bezier(.2, .8, .2, 1); }
   .row > *:not(.bar) { position: relative; }
-  .rank { width: 44px; text-align: center; font-family: var(--title-font); font-weight: 900; font-size: 28px; color: var(--dim); }
-  .rank.r1 { color: var(--gold); text-shadow: 0 0 12px #ffb300; }
-  .rank.r2 { color: #e8ecff; text-shadow: 0 0 10px #c9d4ff; }
-  .rank.r3 { color: #ffb38a; text-shadow: 0 0 10px #ff7a3d; }
+  .rank { width: 40px; text-align: center; font-family: var(--title-font); font-weight: 700; font-size: 26px; color: var(--dim); }
+  .rank.r1 { color: var(--gold-light); text-shadow: 0 0 12px var(--gold); }
+  .rank.r2 { color: var(--marble); text-shadow: 0 0 10px #c9d4ff; }
+  .rank.r3 { color: #e9b78f; text-shadow: 0 0 10px #c98a5a; }
   .who { flex: 1; min-width: 0; }
-  .name { font-weight: 800; font-size: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta { font-size: 14px; color: var(--dim); font-weight: 700; }
-  .score { font-family: var(--title-font); font-weight: 900; font-size: 30px; color: var(--gold); text-shadow: 0 0 10px #ffb30088; }
-  .score small { font-family: var(--body-font); font-size: 13px; color: var(--dim); margin-left: 3px; }
+  .name { font-weight: 700; font-size: 25px; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { font-size: 16px; line-height: 1.15; color: var(--dim); font-style: italic; }
+  .score { font-family: var(--title-font); font-weight: 700; font-size: 27px; color: var(--gold-light); text-shadow: 0 0 10px #d9b57388; }
+  .score small { font-family: var(--body-font); font-style: italic; font-size: 15px; color: var(--dim); margin-left: 3px; text-shadow: none; }
   .row.hot { animation: hot 1.2s 2; }
-  @keyframes hot { 50% { background: #ff4fd844; box-shadow: 0 0 20px #ff4fd888; } }
+  @keyframes hot { 50% { background: #ff2ee644; box-shadow: 0 0 20px #ff2ee688; } }
 
-  .spin { height: 60px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: 12px; }
+  .spin { height: 62px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: 9px; }
   .spin.new { animation: slide .6s cubic-bezier(.2, 1.3, .4, 1); background: #ffffff10; }
   @keyframes slide { from { transform: translateY(-40px); opacity: 0; } }
   .mini { display: flex; gap: 4px; }
-  .mini div { width: 40px; height: 46px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-              font-size: 32px; box-shadow: 0 0 0 2px #f4f1ff, 0 0 0 3px #9b7bd6; overflow: hidden; }
+  .mini div { width: 40px; height: 46px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+              font-size: 32px; box-shadow: 0 0 0 1.5px var(--marble), 0 0 0 2.5px var(--gold); overflow: hidden; }
   .mini.rolling div .god { animation: roll .12s linear infinite; filter: blur(1.5px); }
   @keyframes roll { from { transform: translateY(-30px); } to { transform: translateY(30px); } }
-  .spin .who .name { font-size: 17px; }
-  .spin .meta { font-size: 13px; }
-  .tag { font-weight: 800; font-size: 13px; padding: 4px 9px; border-radius: 8px; background: #ffffff18; color: var(--dim); white-space: nowrap; }
-  .tag.w { background: linear-gradient(90deg, #ff4fd8, #b26bff); color: #fff; }
-  .tag.p { background: linear-gradient(90deg, #3ff3ff, #1a8cff); color: #04203a; }
-  .tag.j { background: linear-gradient(90deg, #fff6c2, #ffd23f); color: #4a2a00; box-shadow: 0 0 12px #ffd23f; }
-  .empty { color: var(--dim); font-weight: 700; font-size: 18px; padding: 30px 10px; text-align: center; }
-  .godtext { background: #0a0b3d88; }
+  .spin .who .name { font-size: 20px; }
+  .spin .meta { font-size: 15px; }
+  .tag { font-weight: 700; font-size: 15px; padding: 2px 9px; border-radius: 7px; background: #ffffff18; color: var(--dim); white-space: nowrap; }
+  .tag.w { background: linear-gradient(90deg, var(--hot-magenta), var(--neon-violet)); color: #fff; }
+  .tag.p { background: linear-gradient(90deg, var(--neon-cyan), #1a8cff); color: #04203a; }
+  .tag.j { background: linear-gradient(90deg, var(--gold-light), var(--gold)); color: var(--plum); box-shadow: 0 0 12px var(--gold); }
+  .empty { color: var(--dim); font-style: italic; font-size: 20px; padding: 30px 10px; text-align: center; }
+  .godtext { background: #1b073899; }
 
   /* shows any page error on the board, since Second Life has no console to read it in */
   #err { position: absolute; left: 40px; right: 40px; bottom: 2px; z-index: 20; font-size: 13px; font-weight: 700; color: #ffb3b3; text-align: center; white-space: nowrap; overflow: hidden; }
 
   /* tip goals take turns with the latest spins */
-  .goal { height: 64px; margin-bottom: 4px; padding: 6px 8px; border-radius: 12px; background: #ffffff0c; }
+  .goal { height: 64px; margin-bottom: 4px; padding: 5px 10px; border-radius: 9px; background: #ffffff0c; }
   .gline { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-  .gline .name { font-size: 18px; }
-  .amt { font-weight: 800; font-size: 14px; color: var(--gold); white-space: nowrap; }
+  .gline .name { font-size: 20px; }
+  .amt { font-weight: 700; font-size: 16px; color: var(--gold-light); white-space: nowrap; }
   .gbar { height: 9px; margin: 4px 0 3px; border-radius: 5px; background: #ffffff18; overflow: hidden; }
-  .gbar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, #ff4fd8, #ffe27a); box-shadow: 0 0 10px #ff4fd8; transition: width .8s; }
-  .gprom { font-size: 13px; font-weight: 700; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gbar i { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--neon-pink), var(--gold-light)); box-shadow: 0 0 10px var(--neon-pink); transition: width .8s; }
+  .gprom { font-size: 15px; font-style: italic; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Harmonia Unlocked: a dancer reached her tip goal */
   #ushow { position: absolute; inset: 0; z-index: 3; display: none;
-           background: radial-gradient(60% 60% at 50% 50%, #ffd23f33, transparent 70%),
-                       linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
+           background: radial-gradient(60% 60% at 50% 50%, #d9b57340, transparent 70%), linear-gradient(180deg, #1b0738f0, #1b0738c7 45%, #1b0738f0), url("harmonia-hall.jpg") center / cover; }
   #ushow.on { display: block; animation: fadein .4s; }
   #ushow.out { animation: fadeout .5s forwards; }
   #ugods { position: absolute; left: 0; right: 0; top: 44px; display: flex; justify-content: center; gap: 34px; font-size: 84px; }
   #ugods span { animation: rise .7s cubic-bezier(.2, 1.6, .4, 1) both, hover 2s ease-in-out infinite alternate; }
   @keyframes rise { from { transform: translateY(70px) scale(.3); opacity: 0; } }
   @keyframes hover { to { translate: 0 -8px; } }
-  #upromise { position: absolute; left: 60px; right: 60px; top: 398px; text-align: center; font-family: var(--title-font); font-weight: 900; font-size: 28px;
-              color: var(--gold); text-shadow: 0 0 12px #ffb300aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #upromise { position: absolute; left: 60px; right: 60px; top: 396px; text-align: center; font-style: italic; font-weight: 700; font-size: 34px;
+              color: var(--gold-light); text-shadow: 0 0 12px #d9b573aa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* the big reel show played for each tipped spin, over the rankings */
-  #show { position: absolute; inset: 0; z-index: 3; display: none;
-          background: radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
-                      linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
+  #show, #gshow { position: absolute; inset: 0; z-index: 3; display: none;
+          background: radial-gradient(55% 50% at 50% 55%, #ff2ee633, transparent 70%), linear-gradient(180deg, #1b0738f0, #1b0738c7 45%, #1b0738f0), url("harmonia-hall.jpg") center / cover; }
   #show.on, #gshow.on { display: block; animation: fadein .4s; }
   #show.out, #gshow.out { animation: fadeout .5s forwards; }
-  #gshow { position: absolute; inset: 0; z-index: 3; display: none;
-           background: radial-gradient(55% 50% at 50% 58%, #ff2fd14d, transparent 70%),
-                       linear-gradient(180deg, #0a0b3df5, #2b0f6bf5 42%, #5a1a9af5 76%, #2a0a5ef5); }
   #gwho { position: absolute; left: 0; right: 0; top: 30px; text-align: center; }
   #gwho .title { font-size: 34px; display: inline-block; }
-  #gwho .subtitle { font-size: 16px; margin-top: 2px; }
+  #gwho .subtitle { font-size: 20px; }
   #gtiles { position: absolute; left: 40px; right: 40px; top: 104px; bottom: 34px; display: flex; flex-wrap: wrap;
             justify-content: center; align-content: center; gap: 12px 22px; }
   .gtile { width: 210px; text-align: center; }
-  .gname { font-family: var(--title-font); font-weight: 900; font-size: 17px; letter-spacing: 1px; color: #fff;
+  .gname { font-family: var(--title-font); font-weight: 700; font-size: 16px; letter-spacing: 1px; color: #fff;
            text-shadow: 0 0 10px var(--neon-pink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .greels { display: flex; gap: 8px; justify-content: center; margin: 5px 0 6px; }
   .gtile .win-box { width: 56px; height: 120px; border-radius: 10px;
-                    box-shadow: 0 0 0 3px #f4f1ff, 0 0 0 5px #9b7bd6, 0 0 14px 3px #ff4fd855, inset 0 0 14px #5a3a9a66; }
-  .gtile .win-box.win { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--wc), 0 0 26px 8px var(--wc); }
+                    box-shadow: 0 0 0 2px var(--marble), 0 0 0 3.5px var(--gold), 0 0 14px 3px #ff2ee655, inset 0 0 14px #5a3a9a66; }
+  .gtile .win-box.win { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--wc), 0 0 26px 8px var(--wc); }
   .gtile .win-box::before, .gtile .win-box::after { height: 30px; }
   .gtile .cell { height: 40px; font-size: 32px; }
   .gtag { display: inline-block; }
@@ -114,14 +107,14 @@
   @keyframes fadeout { to { opacity: 0; } }
   #who { position: absolute; left: 0; right: 0; top: 30px; text-align: center; }
   #who .title { font-size: 38px; display: inline-block; }
-  #who .subtitle { font-size: 18px; margin-top: 2px; }
+  #who .subtitle { font-size: 22px; }
   #reels { position: absolute; left: 0; right: 0; top: 112px; display: flex; justify-content: center; gap: 22px; }
-  .win-box { --wc: #3ff3ff; position: relative; width: 210px; height: 270px; border-radius: 18px; overflow: hidden;
-             box-shadow: 0 0 0 4px #f4f1ff, 0 0 0 7px #9b7bd6, 0 0 22px 6px #ff4fd866, 0 10px 30px #000c, inset 0 0 24px #5a3a9a66; }
+  .win-box { --wc: #00e5ff; position: relative; width: 210px; height: 270px; border-radius: 12px; overflow: hidden;
+             box-shadow: 0 0 0 3px var(--marble), 0 0 0 5.5px var(--gold), 0 0 22px 6px #ff2ee666, 0 10px 30px #000c, inset 0 0 24px #5a3a9a66; }
   .win-box::before, .win-box::after { content: ""; position: absolute; left: 0; right: 0; height: 68px; z-index: 2; pointer-events: none; }
-  .win-box::before { top: 0; background: linear-gradient(#2b0f6bd9, transparent); }
-  .win-box::after { bottom: 0; background: linear-gradient(transparent, #2b0f6bd9); }
-  .win-box.win { box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--wc), 0 0 50px 14px var(--wc), inset 0 0 24px #5a3a9a44; animation: pulse .5s infinite alternate; }
+  .win-box::before { top: 0; background: linear-gradient(#1b0738d9, transparent); }
+  .win-box::after { bottom: 0; background: linear-gradient(transparent, #1b0738d9); }
+  .win-box.win { box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--wc), 0 0 50px 14px var(--wc), inset 0 0 24px #5a3a9a44; animation: pulse .5s infinite alternate; }
   @keyframes pulse { to { transform: scale(1.03); } }
   .win-box.thud { animation: thud .22s; }
   @keyframes thud { 40% { transform: translateY(6px); } }
@@ -129,24 +122,22 @@
   .strip.fast { filter: blur(2.4px); }
   .cell { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 70px; }
   .payline { position: absolute; left: 160px; right: 160px; top: 245px; height: 4px; border-radius: 2px; z-index: 3;
-             background: linear-gradient(90deg, transparent, #ff4fd8, #3ff3ff, #ff4fd8, transparent); opacity: .6; box-shadow: 0 0 10px #ff4fd8; }
+             background: linear-gradient(90deg, transparent, var(--neon-pink), var(--gold-light), var(--neon-pink), transparent); opacity: .7; box-shadow: 0 0 10px var(--neon-pink); }
   #sbanner { position: absolute; left: 60px; right: 60px; top: 398px; height: 56px; display: flex; align-items: center; justify-content: center; gap: 16px; }
-  #slabel { font-family: var(--title-font); font-weight: 900; font-size: 30px; letter-spacing: 1px; color: var(--gold);
-            text-shadow: 0 0 10px #ffb300aa, 0 0 26px #ff4fd866; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 740px; }
+  #slabel { font-family: var(--title-font); font-weight: 700; font-size: 27px; letter-spacing: 1px; color: var(--gold-light);
+            text-shadow: 0 0 10px #d9b573aa, 0 0 26px #ff2ee666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 740px; }
   #slabel.pop, #spts { animation: pop .5s cubic-bezier(.2, 1.6, .4, 1); }
   @keyframes pop { from { transform: scale(.3); opacity: 0; } }
-  #spts { font-weight: 800; font-size: 22px; padding: 6px 14px; border-radius: 12px; color: #fff;
-          background: linear-gradient(90deg, #ff4fd8, #b26bff); box-shadow: 0 0 18px #ff4fd8aa; display: none; }
+  #spts { font-weight: 700; font-size: 24px; padding: 3px 14px; border-radius: 9px; color: #fff;
+          background: linear-gradient(90deg, var(--hot-magenta), var(--neon-violet)); box-shadow: 0 0 18px #ff2ee6aa; display: none; }
 </style>
 </head>
 <body>
 <div class="stage" id="stage">
-  <header><div class="heading"><div class="title" id="club"></div><div class="subtitle">Hall of Champions</div></div><div id="totals"></div></header>
-  <div class="panel" id="left"><h2>FAVORED BY THE GODS</h2><div id="top"></div></div>
-  <div class="panel" id="right"><h2 id="rtitle">LATEST SPINS</h2><div id="last"></div><div id="goals" style="display:none"></div></div>
+  <header><div class="plaque" id="spins"></div><div id="crest"><div class="crest"><span id="ll"></span><div class="title" id="club"></div><span id="lr"></span></div><div class="subtitle">Hall of Champions</div></div><div class="plaque" id="jackpots"></div></header>
+  <div class="temple panel" id="left"><h2 class="heading">Favored by the Gods</h2><div id="top"></div></div>
+  <div class="temple panel" id="right"><h2 class="heading" id="rtitle">Latest Spins</h2><div id="last"></div><div id="goals" style="display:none"></div></div>
   <div id="show">
-    <div class="column" style="left:84px;top:124px;height:244px"></div>
-    <div class="column" style="right:84px;top:124px;height:244px"></div>
     <div id="who"></div>
     <div id="reels">
       <div class="win-box marble"><div class="strip"></div></div>
@@ -172,12 +163,14 @@ const NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
 let lastN = null, demoTimer = null;
 
 fit(stage);
-scenery(stage, [590, 38]);
+scenery(stage, [495, 110]);
+$('ll').innerHTML = LAUREL(false);
+$('lr').innerHTML = LAUREL(true);
 
 function render(d, animate, fresh) {
-  fitText($('club'), d.title || CLUB_DEFAULT, 400, 36);
-  $('totals').innerHTML = `<div class="chip"><b>${d.spins}</b> spins</div>`
-    + `<div class="chip"><b>${d.jackpots}</b> Zeus jackpot${d.jackpots == 1 ? '' : 's'}</div>`;
+  fitText($('club'), d.title || CLUB_DEFAULT, 340, 36);
+  $('spins').innerHTML = `<b>${d.spins}</b> spin${d.spins == 1 ? '' : 's'}`;
+  $('jackpots').innerHTML = `<b>${d.jackpots}</b> Zeus jackpot${d.jackpots == 1 ? '' : 's'}`;
 
   const best = Math.max(1, ...d.top.map(p => p.pts));
   const hotName = animate && d.last[0] ? d.last[0].name : null;
@@ -228,7 +221,7 @@ function render(d, animate, fresh) {
 let haveGoals = false, onGoals = false;
 function showRight() {
   const g = onGoals && haveGoals;
-  $('rtitle').textContent = g ? 'TIP GOALS' : 'LATEST SPINS';
+  $('rtitle').textContent = g ? 'Tip Goals' : 'Latest Spins';
   $('goals').style.display = g ? 'block' : 'none';
   $('last').style.display = g ? 'none' : 'block';
 }
