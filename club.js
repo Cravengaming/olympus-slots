@@ -17,10 +17,6 @@ const OUTCOMES = { JACKPOT: 'Zeus', POSEIDON: 'Poseidon', APHRODITE: 'Aphrodite'
                    ATHENA: 'Athena', ARTEMIS: 'Artemis', PAIR: 'Pair', MISS: 'Miss' };
 
 (function sprite() {
-  let grapes = '';
-  [[23, 30], [41, 30], [59, 30], [77, 30], [32, 46], [50, 46], [68, 46], [41, 62], [59, 62], [50, 78]]
-    .forEach(([x, y]) => grapes += `<circle cx="${x}" cy="${y}" r="9.5" fill="url(#gDio)" stroke="#3a0a5e" stroke-width="2.5"/>`);
-  let ribs = '';
   // A laurel branch for the left of a title: leaves in pairs along a curve, smaller toward the tip
   let laurel = '';
   const curve = t => [(1 - t) * (1 - t) * 46 + 2 * t * (1 - t) * -8 + t * t * 34, (1 - t) * (1 - t) * 96 + 2 * t * (1 - t) * 58 + t * t * 8];
@@ -31,55 +27,18 @@ const OUTCOMES = { JACKPOT: 'Zeus', POSEIDON: 'Poseidon', APHRODITE: 'Aphrodite'
   }
   document.body.insertAdjacentHTML('afterbegin', `
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <linearGradient id="gAth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f6ff"/><stop offset="1" stop-color="#7c86c9"/></linearGradient>
-  <linearGradient id="gArt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#9d8cff"/></linearGradient>
-  <radialGradient id="gDio" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#f3d2ff"/><stop offset=".5" stop-color="#b14dff"/><stop offset="1" stop-color="#5a12a0"/></radialGradient>
-  <linearGradient id="gAph" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe6f6"/><stop offset="1" stop-color="#ff00b8"/></linearGradient>
-  <linearGradient id="gPos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9ffff"/><stop offset="1" stop-color="#14b8d4"/></linearGradient>
-  <linearGradient id="gZeus" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffbe0"/><stop offset=".5" stop-color="#ffd23f"/><stop offset="1" stop-color="#ff9f1c"/></linearGradient>
   <linearGradient id="gLaurel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#f3e0b5"/><stop offset="1" stop-color="#d9b573"/></linearGradient>
   <linearGradient id="gLeaf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7dffc0"/><stop offset="1" stop-color="#1f8a6a"/></linearGradient>
   <symbol id="laurel" viewBox="0 0 60 100">
     <path d="M46 96Q-8 58 34 8" fill="none" stroke="#d9b573" stroke-width="2" stroke-linecap="round"/>
     ${laurel}
   </symbol>
-  <symbol id="god0" viewBox="0 0 100 100">
-    <path d="M50 94C26 94 18 72 21 50L16 10L35 25Q50 19 65 25L84 10L79 50C82 72 74 94 50 94Z" fill="url(#gAth)" stroke="#2c2f6b" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M34 74q8 6 16 0q8 6 16 0M38 84q6 5 12 0q6 5 12 0" fill="none" stroke="#2c2f6b" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
-    <circle cx="37" cy="46" r="12" fill="#fff" stroke="#2c2f6b" stroke-width="3"/><circle cx="63" cy="46" r="12" fill="#fff" stroke="#2c2f6b" stroke-width="3"/>
-    <circle cx="37" cy="46" r="6.5" fill="#ffb300"/><circle cx="63" cy="46" r="6.5" fill="#ffb300"/>
-    <circle cx="37" cy="46" r="3" fill="#1a1030"/><circle cx="63" cy="46" r="3" fill="#1a1030"/>
-    <path d="M45 57H55L50 67Z" fill="#ff9f1c" stroke="#2c2f6b" stroke-width="2" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="god1" viewBox="0 0 100 100">
-    <path d="M64 8A44 44 0 1 0 64 92A36 36 0 1 1 64 8Z" fill="url(#gArt)" stroke="#3a2a8a" stroke-width="3.5" stroke-linejoin="round"/>
-    <path d="M80 22l3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z" fill="#fff6c2" stroke="#3a2a8a" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M84 58l2 4 4 1-3 3 1 4-4-2-4 2 1-4-3-3 4-1z" fill="#fff6c2" stroke="#3a2a8a" stroke-width="1.5" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="god2" viewBox="0 0 100 100">
-    <path d="M50 22Q52 12 60 6" fill="none" stroke="#6b3b12" stroke-width="4" stroke-linecap="round"/>
-    <path d="M53 18Q70 2 88 12Q78 30 56 24Z" fill="#5be39a" stroke="#0f5a3a" stroke-width="3" stroke-linejoin="round"/>
-    ${grapes}
-  </symbol>
-  <symbol id="god3" viewBox="0 0 100 100">
-    <path d="M50 84L12 44Q14 12 50 10Q86 12 88 44Z" fill="url(#gAph)" stroke="#8a1458" stroke-width="3.5" stroke-linejoin="round"/>
-    ${ribs}
-    <path d="M38 82H62L58 93H42Z" fill="url(#gAph)" stroke="#8a1458" stroke-width="3" stroke-linejoin="round"/>
-    <circle cx="50" cy="60" r="6" fill="#fff" stroke="#8a1458" stroke-width="2"/>
-  </symbol>
-  <symbol id="god4" viewBox="0 0 100 100">
-    <path d="M50 1L58 14H54V54H46V14H42Z M18 10L25 1L32 10H28V32Q34 44 46 47V55Q28 52 22 36V10Z M82 10L75 1L68 10H72V32Q66 44 54 47V55Q72 52 78 36V10Z"
-          fill="url(#gPos)" stroke="#04384a" stroke-width="3" stroke-linejoin="round"/>
-    <rect x="39" y="52" width="22" height="8" rx="2" fill="url(#gPos)" stroke="#04384a" stroke-width="3"/>
-    <rect x="46" y="60" width="8" height="37" rx="3" fill="url(#gPos)" stroke="#04384a" stroke-width="3"/>
-  </symbol>
-  <symbol id="god5" viewBox="0 0 100 100">
-    <path d="M60 2L20 54H45L33 98L82 38H56L72 2Z" fill="url(#gZeus)" stroke="#7a3d00" stroke-width="4" stroke-linejoin="round"/>
-  </symbol>
 </defs></svg>`);
 })();
 
-const sym = i => GODS[i] ? `<svg class="god god${i}"><use href="#god${i}"/></svg>` : '';
+// The god's tile from the Harmonia slot icon artwork. It's 1em tall, so font-size sets its size.
+const godPic = i => `gods/${GODS[i].name.toLowerCase()}.png${location.search}`;
+const sym = i => GODS[i] ? `<img class="god" src="${godPic(i)}" alt="${GODS[i].name}">` : '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const dec = s => { try { return decodeURIComponent(s || ''); } catch (e) { return s || ''; } };

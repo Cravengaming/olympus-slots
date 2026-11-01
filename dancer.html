@@ -32,9 +32,9 @@
   #pbar { margin-top: 3px; height: 8px; border-radius: 4px; background: #ffffff18; overflow: hidden; display: none; }
   #pbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--neon-pink), var(--gold-light)); transition: width .8s; }
   #last { left: 34px; top: 266px; width: 470px; height: 220px; text-align: center; }
-  .mini { display: flex; justify-content: center; gap: 10px; margin: 8px 0 12px; }
-  .mini div { width: 88px; height: 100px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 68px;
-              box-shadow: 0 0 0 2px var(--marble), 0 0 0 4px var(--gold), 0 0 14px #ff2ee655; }
+  .mini { display: flex; justify-content: center; gap: 12px; margin: 6px 0 10px; }
+  .mini div { width: 92px; height: 105px; font-size: 105px; }
+  .mini div.blank { border-radius: 10px; box-shadow: 0 0 0 2px var(--gold); }
   #llabel { font-family: var(--title-font); font-weight: 700; font-size: 18px; color: var(--gold-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 0 8px #d9b57388; }
 
   #toy { left: 520px; right: 34px; top: 90px; height: 396px; text-align: center; }
@@ -83,8 +83,8 @@ function render() {
   $('status').querySelector('span').textContent = live ? 'LIVE' : 'PAUSED';
   $('pname').textContent = st.pl || 'No spins yet';
   $('pname').className = st.pl ? '' : 'none';
-  $('lreels').innerHTML = st.r.length === 3 ? st.r.map(r => `<div class="marble">${sym(r)}</div>`).join('')
-                                            : '<div class="marble"></div><div class="marble"></div><div class="marble"></div>';
+  $('lreels').innerHTML = st.r.length === 3 ? st.r.map(r => `<div>${sym(r)}</div>`).join('')
+                                            : '<div class="marble blank"></div><div class="marble blank"></div><div class="marble blank"></div>';
   $('llabel').textContent = st.l || 'Waiting for the first spin';
   $('pgoal').textContent = st.gg > 0 ? `Goal: L$${st.gr} / L$${st.gg}${st.gt ? ' · ' + st.gt : ''}` : 'Menu → Tip Goal to set a goal';
   $('pbar').style.display = st.gg > 0 ? 'block' : 'none';

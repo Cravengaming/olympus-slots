@@ -105,10 +105,8 @@ body { font-family: var(--body-font); font-weight: 600; color: var(--ink); font-
   background: #17052fd9; border: 1px solid #d9b57399; box-shadow: 0 0 8px #ff2ee64d; }
 .plaque b { font-family: var(--title-font); color: var(--gold-light); font-size: 18px; }
 
-/* god symbols (drawn in club.js) */
-.god { width: 1em; height: 1em; overflow: visible; vertical-align: middle; }
-.god4 { filter: drop-shadow(0 0 4px #00e5ffaa); }
-.god5 { filter: drop-shadow(0 0 5px #ffd23fcc); }
+/* god tiles from the slot icon artwork (see gods/); font-size sets their height */
+.god { display: block; height: 1em; width: .875em; }
 
 /* white marble tile used for reels */
 .marble {
