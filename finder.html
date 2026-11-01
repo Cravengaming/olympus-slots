@@ -397,7 +397,8 @@ function tellHud(action, i, value) {
 function tellRoster() {
   let i = 0;
   const next = () => {
-    if (i >= people.length || !hud) return;
+    if (!hud) return;
+    if (i >= people.length) { new Image().src = `${hud}?a=ready`; return; }
     const p = people[i++], img = new Image();
     img.onload = img.onerror = next;
     img.src = `${hud}?a=who&i=${p.i}&k=${p.key || 'none'}&n=${encodeURIComponent(p.name)}&c=${encodeURIComponent(club)}`;
