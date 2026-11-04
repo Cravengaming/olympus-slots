@@ -1,3 +1,4 @@
+// © 2026 Harmonia. All rights reserved.
 // Shared pieces for every screen: the club name, god symbols, scenery, reading the
 // address, scaling, and the effects (sparks, coins, petals, bubbles, lightning).
 // Symbol order matches the controller's reels:
